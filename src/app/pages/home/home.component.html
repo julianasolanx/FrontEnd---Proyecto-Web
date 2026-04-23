@@ -1,0 +1,130 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a routerLink="/home" class="navbar-logo">
+    Procesos
+    <span>empresariales</span>
+  </a>
+  <div class="nav-user-info">
+    <div class="user-avatar">{{ (usuario?.nombre ?? '?').charAt(0) | uppercase }}</div>
+    <span class="user-name">{{ (usuario?.nombre ?? '').split(' ')[0] }}</span>
+    <button class="btn-pill outline" (click)="cerrarSesion()">Salir</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <!-- WELCOME -->
+  <div class="welcome-section">
+    <div class="role-tag">{{ usuario?.rol }}</div>
+    <h2>Nuestros Procesos,<br>{{ (usuario?.nombre ?? '').split(' ')[0] }} 👋</h2>
+    <p>Gestiona y visualiza los procesos empresariales de tu organización.</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card cream">
+      <span class="stat-emoji">📋</span>
+      <div class="stat-info">
+        <h3>{{ procesos.length }}</h3>
+        <p>Total procesos</p>
+      </div>
+    </div>
+    <div class="stat-card amber">
+      <span class="stat-emoji">✅</span>
+      <div class="stat-info">
+        <h3>{{ totalPublicados }}</h3>
+        <p>Publicados</p>
+      </div>
+    </div>
+    <div class="stat-card pink">
+      <span class="stat-emoji">✏️</span>
+      <div class="stat-info">
+        <h3>{{ totalBorradores }}</h3>
+        <p>Borradores</p>
+      </div>
+    </div>
+    <div class="stat-card blue">
+      <span class="stat-emoji">⏸️</span>
+      <div class="stat-info">
+        <h3>{{ totalInactivos }}</h3>
+        <p>Inactivos</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER PROCESOS -->
+  <div class="section-header">
+    <h5>Todos los procesos</h5>
+    <button class="btn-pill">+ Nuevo proceso</button>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filter-bar">
+    <input
+      class="filter-input"
+      type="text"
+      placeholder="🔍  Buscar por nombre..."
+      [(ngModel)]="busqueda"
+      (input)="filtrar()" />
+    <select class="filter-select" [(ngModel)]="filtroEstado" (change)="filtrar()">
+      <option value="">Todos los estados</option>
+      <option value="PUBLICADO">Publicado</option>
+      <option value="BORRADOR">Borrador</option>
+      <option value="INACTIVO">Inactivo</option>
+    </select>
+  </div>
+
+  <!-- LOADING -->
+  <div class="spinner-wrap" *ngIf="cargando">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="estado-vacio" *ngIf="errorConexion && !cargando">
+    <span class="emoji">🔌</span>
+    {{ errorConexion }}
+  </div>
+
+  <!-- GRID PROCESOS -->
+  <div class="proceso-grid" *ngIf="!cargando && !errorConexion">
+
+    <div class="estado-vacio" *ngIf="procesosFiltrados.length === 0">
+      <span class="emoji">📭</span>
+      No se encontraron procesos.
+    </div>
+
+    <div
+      class="proceso-card"
+      *ngFor="let p of procesosFiltrados; let i = index">
+
+      <div class="proceso-card-top" [ngClass]="getPaleta(i)">
+        <span class="proceso-nombre">{{ p.nombre }}</span>
+        <span class="badge-estado" [ngClass]="'badge-' + p.estado">
+          {{ p.estado }}
+        </span>
+      </div>
+
+      <div class="proceso-card-body">
+        <p class="proceso-desc">{{ p.descripcion || 'Sin descripción disponible.' }}</p>
+        <p class="proceso-meta">
+          📂 {{ p.categoria || 'Sin categoría' }} &nbsp;·&nbsp; 🏢 Empresa {{ p.empresaId }}
+        </p>
+        <div class="proceso-actions">
+          <button class="btn-action">👁 Ver</button>
+          <button class="btn-action primary">✏️ Editar</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    Procesos
+    <span>empresariales</span>
+  </div>
+</footer>

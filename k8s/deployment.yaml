@@ -1,0 +1,72 @@
+# ==================
+# Deployment
+# ==================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mi-proyecto-frontend
+  namespace: <namespace>
+  labels:
+    app: mi-proyecto-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mi-proyecto-frontend
+  template:
+    metadata:
+      labels:
+        app: mi-proyecto-frontend
+    spec:
+      containers:
+        - name: mi-proyecto-frontend
+          image: ghcr.io/joseval29/mi-proyecto-frontend:latest
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ghcr-secret
+
+---
+# ==================
+# Service
+# ==================
+apiVersion: v1
+kind: Service
+metadata:
+  name: mi-proyecto-frontend
+  namespace: <namespace>
+  labels:
+    app: mi-proyecto-frontend
+spec:
+  selector:
+    app: mi-proyecto-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+
+---
+# ==================
+# Ingress
+# ==================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mi-proyecto-frontend
+  namespace: <namespace>
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: <namespace>.inphotech.co
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mi-proyecto-frontend
+                port:
+                  number: 80

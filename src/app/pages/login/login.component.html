@@ -1,0 +1,70 @@
+<div class="login-wrapper">
+
+  <div class="login-card">
+    <h1>Iniciar Sesion</h1>
+    <hr>
+
+    <div class="alert alert-error" *ngIf="errorMsg">
+      {{ errorMsg }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" novalidate>
+
+      <div class="form-group">
+        <label for="correo">Correo Electronico:</label>
+        <input
+          type="email"
+          id="correo"
+          name="correo"
+          [(ngModel)]="credentials.correo"
+          placeholder="Ingrese el correo electrónico"
+          autocomplete="email"
+          required />
+      </div>
+
+      <div class="form-group">
+        <label for="contrasena">Contraseña:</label>
+        <input
+          type="password"
+          id="contrasena"
+          name="contrasena"
+          [(ngModel)]="credentials.contrasena"
+          placeholder="Ingrese su contraseña"
+          autocomplete="current-password"
+          required />
+      </div>
+
+      <div class="form-footer-row">
+        <p class="form-footer">
+          ¿No tienes cuenta? <a routerLink="/register">Regístrate aquí</a>
+        </p>
+        <button type="submit" class="btn-pill" [disabled]="loading">
+          <span *ngIf="!loading">registrarse</span>
+          <span *ngIf="loading">Ingresando...</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="login-illustration">
+    <div class="sprinkles">
+      <span class="sp sp1"></span><span class="sp sp2"></span><span class="sp sp3"></span>
+      <span class="sp sp4"></span><span class="sp sp5"></span><span class="sp sp6"></span>
+      <span class="sp sp7"></span><span class="sp sp8"></span><span class="sp sp9"></span>
+    </div>
+    <div class="illus-placeholder">
+      <i class="fa-solid fa-user-tie"></i>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="social-icons">
+    <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+    <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+    <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+  </div>
+  <div class="footer-logo">Procesos <span>empresariales</span></div>
+</footer>
