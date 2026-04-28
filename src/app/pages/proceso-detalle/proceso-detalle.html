@@ -1,0 +1,66 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a routerLink="/home" class="navbar-logo">
+    Procesos<span>empresariales</span>
+  </a>
+  <div class="nav-actions">
+    <a routerLink="/home" class="btn-pill outline">← Volver</a>
+    <div class="user-avatar">{{ (usuario?.nombre ?? '?').charAt(0) | uppercase }}</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <!-- LOADING -->
+  <div class="spinner-wrap" *ngIf="cargando">
+    <div class="spinner"></div>
+  </div>
+
+  <ng-container *ngIf="!cargando && proceso">
+
+    <!-- HEADER DEL PROCESO -->
+    <div class="proceso-header">
+      <div class="proceso-meta">
+        <span class="badge-estado" [ngClass]="'badge-' + proceso.estado">{{ proceso.estado }}</span>
+        <span class="proceso-cat" *ngIf="proceso.categoria">📂 {{ proceso.categoria }}</span>
+      </div>
+      <div class="proceso-title-row">
+        <h1>{{ proceso.nombre }}</h1>
+        <div class="header-actions">
+          <button class="btn-pill outline" (click)="modoEdicion = !modoEdicion">
+            {{ modoEdicion ? 'Cancelar' : '✏️ Editar' }}
+          </button>
+          <button class="btn-pill danger" (click)="eliminar()">🗑️ Eliminar</button>
+        </div>
+      </div>
+      <p class="proceso-desc" *ngIf="proceso.descripcion">{{ proceso.descripcion }}</p>
+    </div>
+
+    <!-- EDITOR INLINE -->
+    <app-proceso-editor
+      *ngIf="modoEdicion"
+      [proceso]="proceso"
+      [empresaId]="proceso.empresaId"
+      (guardado)="onGuardado($event)"
+      (cancelado)="modoEdicion = false">
+    </app-proceso-editor>
+
+    <!-- ACTIVIDADES (componente hijo con @Input) -->
+    <app-actividades
+      [procesoId]="proceso.id"
+      [empresaId]="proceso.empresaId">
+    </app-actividades>
+
+    <!-- HISTORIAL (componente hijo con @Input) -->
+    <app-historial
+      [procesoId]="proceso.id">
+    </app-historial>
+
+  </ng-container>
+
+</main>
+
+<footer>
+  <div class="footer-logo">Procesos<span>empresariales</span></div>
+</footer>

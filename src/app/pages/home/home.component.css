@@ -241,6 +241,8 @@
 .btn-action:hover { background: #111; color: #fff; }
 .btn-action.primary { background: #111; color: #fff; }
 .btn-action.primary:hover { background: #333; border-color: #333; }
+.btn-action.danger { border-color: #ef4444; color: #ef4444; flex: 0; padding: 0.5rem 0.65rem; }
+.btn-action.danger:hover { background: #ef4444; color: #fff; }
 
 /* ESTADO VACÍO / SPINNER */
 .estado-vacio {

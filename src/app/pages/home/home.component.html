@@ -56,8 +56,18 @@
   <!-- HEADER PROCESOS -->
   <div class="section-header">
     <h5>Todos los procesos</h5>
-    <button class="btn-pill">+ Nuevo proceso</button>
+    <button class="btn-pill" (click)="mostrarEditor = !mostrarEditor">
+      {{ mostrarEditor ? '✕ Cancelar' : '+ Nuevo proceso' }}
+    </button>
   </div>
+
+  <!-- EDITOR INLINE (componente hijo con @Output) -->
+  <app-proceso-editor
+    *ngIf="mostrarEditor"
+    [empresaId]="usuario?.empresaId ?? 0"
+    (guardado)="onProcesoGuardado($event)"
+    (cancelado)="mostrarEditor = false">
+  </app-proceso-editor>
 
   <!-- FILTROS -->
   <div class="filter-bar">
@@ -111,8 +121,9 @@
           📂 {{ p.categoria || 'Sin categoría' }} &nbsp;·&nbsp; 🏢 Empresa {{ p.empresaId }}
         </p>
         <div class="proceso-actions">
-          <button class="btn-action">👁 Ver</button>
-          <button class="btn-action primary">✏️ Editar</button>
+          <button class="btn-action" (click)="verDetalle(p.id)">👁 Ver</button>
+          <button class="btn-action primary" [routerLink]="['/proceso', p.id]">✏️ Editar</button>
+          <button class="btn-action danger" (click)="eliminar(p.id, $event)">🗑️</button>
         </div>
       </div>
 

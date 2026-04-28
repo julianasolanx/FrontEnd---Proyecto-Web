@@ -5,7 +5,7 @@ import { Proceso } from '../models/proceso.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProcesoService {
-  private apiUrl = 'http://localhost:8080/api/procesos';
+  private apiUrl = '/api/procesos';
 
   constructor(private http: HttpClient) {}
 
@@ -15,5 +15,21 @@ export class ProcesoService {
 
   getProcesosPorEmpresa(empresaId: number): Observable<Proceso[]> {
     return this.http.get<Proceso[]>(`${this.apiUrl}/empresa/${empresaId}`);
+  }
+
+  getProceso(id: number): Observable<Proceso> {
+    return this.http.get<Proceso>(`${this.apiUrl}/${id}`);
+  }
+
+  crearProceso(dto: Partial<Proceso>): Observable<Proceso> {
+    return this.http.post<Proceso>(this.apiUrl, dto);
+  }
+
+  actualizarProceso(id: number, dto: Partial<Proceso>): Observable<Proceso> {
+    return this.http.put<Proceso>(`${this.apiUrl}/${id}`, dto);
+  }
+
+  eliminarProceso(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

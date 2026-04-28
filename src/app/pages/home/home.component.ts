@@ -1,16 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ProcesoService } from '../../services/proceso.service';
+import { ProcesoEditorComponent } from '../../components/proceso-editor/proceso-editor';
 import { Usuario } from '../../models/usuario.model';
 import { Proceso } from '../../models/proceso.model';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink, ProcesoEditorComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -22,6 +23,7 @@ export class HomeComponent implements OnInit {
   filtroEstado = '';
   cargando = true;
   errorConexion = '';
+  mostrarEditor = false;
 
   readonly paletas = ['cream', 'amber', 'pink', 'blue'];
 
@@ -52,7 +54,7 @@ export class HomeComponent implements OnInit {
         this.procesosFiltrados = data;
         this.cargando = false;
       },
-      error: (err) => {
+      error: () => {
         this.errorConexion = 'No se pudo conectar con el servidor.';
         this.cargando = false;
       }
@@ -64,6 +66,24 @@ export class HomeComponent implements OnInit {
       const coincideNombre = p.nombre.toLowerCase().includes(this.busqueda.toLowerCase());
       const coincideEstado = !this.filtroEstado || p.estado === this.filtroEstado;
       return coincideNombre && coincideEstado;
+    });
+  }
+
+  onProcesoGuardado(_p: Proceso): void {
+    this.mostrarEditor = false;
+    this.cargarProcesos();
+  }
+
+  verDetalle(id: number): void {
+    this.router.navigate(['/proceso', id]);
+  }
+
+  eliminar(id: number, event: Event): void {
+    event.stopPropagation();
+    if (!confirm('¿Eliminar este proceso?')) return;
+    this.procesoService.eliminarProceso(id).subscribe({
+      next: () => this.cargarProcesos(),
+      error: (e) => alert(e.error?.message || 'No se pudo eliminar.')
     });
   }
 

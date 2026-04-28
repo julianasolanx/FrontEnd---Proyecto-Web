@@ -1,0 +1,75 @@
+<div class="actividades-section">
+
+  <div class="section-header">
+    <h5>Actividades</h5>
+    <button class="btn-pill" (click)="abrirNuevo()" *ngIf="!mostrarForm">+ Nueva actividad</button>
+  </div>
+
+  <!-- FORMULARIO INLINE -->
+  <div class="act-form-card" *ngIf="mostrarForm">
+    <h4>{{ editando ? 'Editar actividad' : 'Nueva actividad' }}</h4>
+    <div class="alert-error" *ngIf="error">{{ error }}</div>
+
+    <form (ngSubmit)="guardar()" novalidate>
+      <div class="field-row">
+        <div class="field">
+          <label>Nombre *</label>
+          <input type="text" [(ngModel)]="form.nombre" name="nombre" placeholder="Nombre de la actividad" />
+        </div>
+        <div class="field">
+          <label>Tipo</label>
+          <select [(ngModel)]="form.tipo" name="tipo">
+            <option value="INICIO">Inicio</option>
+            <option value="TAREA">Tarea</option>
+            <option value="DECISION">Decisión</option>
+            <option value="FIN">Fin</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Descripción</label>
+          <input type="text" [(ngModel)]="form.descripcion" name="descripcion" placeholder="Descripción (opcional)" />
+        </div>
+        <div class="field">
+          <label>Rol responsable</label>
+          <select [(ngModel)]="form.rolResponsableId" name="rolResponsableId">
+            <option [ngValue]="undefined">Sin rol</option>
+            <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.nombre }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn-pill outline" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="btn-pill">{{ editando ? 'Actualizar' : 'Agregar' }}</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- LISTA -->
+  <div class="spinner-wrap" *ngIf="cargando">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="empty-state" *ngIf="!cargando && actividades.length === 0 && !mostrarForm">
+    Sin actividades. Agrega la primera.
+  </div>
+
+  <div class="act-list" *ngIf="!cargando">
+    <div class="act-item" *ngFor="let a of actividades">
+      <div class="act-left">
+        <span class="badge-tipo" [ngClass]="getTipoBadge(a.tipo)">{{ a.tipo }}</span>
+        <div class="act-info">
+          <strong>{{ a.nombre }}</strong>
+          <span *ngIf="a.descripcion">{{ a.descripcion }}</span>
+          <small>Rol: {{ getNombreRol(a.rolResponsableId) }}</small>
+        </div>
+      </div>
+      <div class="act-actions">
+        <button class="btn-icon" title="Editar" (click)="abrirEditar(a)">✏️</button>
+        <button class="btn-icon danger" title="Eliminar" (click)="eliminar(a.id)">🗑️</button>
+      </div>
+    </div>
+  </div>
+
+</div>

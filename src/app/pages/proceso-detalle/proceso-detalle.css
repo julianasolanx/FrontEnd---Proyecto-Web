@@ -1,0 +1,185 @@
+:host {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  background: #f9fafb;
+  min-height: 100vh;
+}
+
+/* NAVBAR */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: #fff;
+  border-bottom: 1px solid #ececec;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-logo {
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: #111;
+  text-decoration: none;
+}
+
+.navbar-logo span {
+  display: block;
+  font-size: 0.5rem;
+  letter-spacing: 3px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-top: -3px;
+}
+
+.nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: #e8a847;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: #111;
+}
+
+/* MAIN */
+.main-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+/* PROCESO HEADER */
+.proceso-header {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.proceso-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.proceso-cat { font-size: 0.82rem; color: #6b7280; font-weight: 600; }
+
+.proceso-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.proceso-title-row h1 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.header-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+.proceso-desc { color: #6b7280; font-size: 0.9rem; margin: 0; }
+
+/* BADGES */
+.badge-estado {
+  padding: 0.25rem 0.7rem;
+  border-radius: 50px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.badge-PUBLICADO { background: #dcfce7; color: #15803d; }
+.badge-BORRADOR  { background: #fef9c3; color: #a16207; }
+.badge-INACTIVO  { background: #f1f5f9; color: #64748b; }
+
+/* BUTTONS */
+.btn-pill {
+  background: #111;
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 0.5rem 1.2rem;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-pill:hover { opacity: 0.85; }
+
+.btn-pill.outline {
+  background: transparent;
+  color: #111;
+  border: 2px solid #111;
+}
+
+.btn-pill.outline:hover { background: #111; color: #fff; }
+
+.btn-pill.danger {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.btn-pill.danger:hover { background: #dc2626; }
+
+/* SPINNER */
+.spinner-wrap { display: flex; justify-content: center; padding: 4rem; }
+
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #e8a847;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* FOOTER */
+footer {
+  background: #87ceeb;
+  padding: 2rem;
+  text-align: center;
+  margin-top: 4rem;
+}
+
+.footer-logo {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: #111;
+}
+
+.footer-logo span {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.5);
+  margin-top: -4px;
+}
+
+@media (max-width: 600px) {
+  .proceso-title-row { flex-direction: column; }
+  .header-actions { flex-wrap: wrap; }
+  .main-content { padding: 1.5rem 1rem 3rem; }
+}
