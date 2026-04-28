@@ -26,6 +26,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copiar build generado de Angular
 COPY --from=build /app/dist/mi-proyecto/browser /usr/share/nginx/html
 
+# Angular SSR genera index.csr.html en vez de index.html — sobreescribir el default de nginx
+RUN cp /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
