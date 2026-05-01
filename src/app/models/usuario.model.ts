@@ -1,20 +1,22 @@
-export interface LoginRequest {
-  correo: string;
-  contrasena: string;
-}
-
+import { Empresa } from './empresa.model';
+ 
+export type RolUsuario = 'ADMINISTRADOR' | 'EDITOR' | 'SOLO_LECTURA';
+ 
 export interface Usuario {
   id: number;
   nombre: string;
   correo: string;
-  rol: string;
-  empresaId: number;
+  contrasena: string;
+  rol: RolUsuario;
+  status: number;
+  empresa?: Empresa;
 }
-
-export interface CrearUsuario {
+ 
+export interface UsuarioRequest {
   nombre: string;
   correo: string;
   contrasena: string;
-  rol: string;
+  rol: RolUsuario;
   empresaId?: number;
 }
+ 
