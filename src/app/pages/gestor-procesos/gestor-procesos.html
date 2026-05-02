@@ -1,0 +1,43 @@
+<div class="gestor-container">
+  <button class="back-arrow" (click)="volver()">⤺</button>
+  <h1 class="page-title">Gestión de Procesos</h1>
+
+  <form [formGroup]="filtrosForm" class="filtros-container">
+    <div class="search-box">
+      <input type="text" formControlName="busqueda" placeholder="Buscar proceso por nombre">
+      <span class="search-icon">🔍</span>
+    </div>
+    
+    <select formControlName="categoria" class="filter-select">
+      <option value="">Por categoria</option>
+      <option *ngFor="let cat of categoriasDisponibles" [value]="cat">{{ cat }}</option>
+    </select>
+
+    <select formControlName="estado" class="filter-select">
+      <option value="">Por estado</option>
+      <option *ngFor="let est of estadosDisponibles" [value]="est">{{ est }}</option>
+    </select>
+  </form>
+
+  <div class="procesos-grid">
+    <div *ngIf="procesosFiltrados.length === 0" class="empty-state">
+      <p>No se encontraron procesos.</p>
+    </div>
+
+    <div class="proceso-card" *ngFor="let p of procesosFiltrados">
+      <h2>{{ p.nombre }}</h2>
+      
+      <!-- Descripción y Estado justo debajo del nombre -->
+      <p class="proceso-info">{{ p.descripcion }}</p>
+      <p class="proceso-estado">Estado: {{ p.estado }}</p>
+
+      <div class="card-buttons">
+        <button class="btn-card" (click)="verDetalle(p.id)">ver detalle</button>
+        <button class="btn-card" (click)="editarProceso(p.id)">editar proceso</button>
+        <button class="btn-card" (click)="eliminarProceso(p)">eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-agregar" (click)="agregarProceso()">Agregar Proceso</button>
+</div>

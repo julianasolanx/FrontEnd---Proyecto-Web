@@ -1,0 +1,39 @@
+<div class="formulario-container">
+  <button class="back-arrow" (click)="volver()">⤺</button>
+
+  <div class="form-card">
+    <h1 class="page-title">{{ esModoEdicion ? 'Editar Proceso' : 'Agregar Nuevo Proceso' }}</h1>
+
+    <form [formGroup]="procesoForm" (ngSubmit)="guardar()">
+      
+      <div class="form-group">
+        <label>Nombre del Proceso</label>
+        <input type="text" formControlName="nombre" placeholder="Ej: Contratación de personal">
+      </div>
+
+      <div class="form-group">
+        <label>Categoría</label>
+        <input type="text" formControlName="categoria" placeholder="Ej: Recursos Humanos">
+      </div>
+
+      <div class="form-group">
+        <label>Descripción</label>
+        <textarea formControlName="descripcion" placeholder="Describe brevemente el objetivo y alcance de este proceso..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Estado Inicial</label>
+        <select formControlName="estado">
+          <option *ngFor="let est of estadosDisponibles" [value]="est">{{ est }}</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancelar" (click)="volver()">Cancelar</button>
+        <button type="submit" class="btn-guardar" [disabled]="procesoForm.invalid || guardando">
+          {{ guardando ? 'Guardando...' : (esModoEdicion ? 'Actualizar Cambios' : 'Crear Proceso') }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

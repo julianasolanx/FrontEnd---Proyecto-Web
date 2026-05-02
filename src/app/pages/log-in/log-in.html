@@ -1,0 +1,36 @@
+<div class="page-container">
+  <button class="back-arrow" (click)="volver()">⤺</button>
+
+  <div class="login-card">
+    <h1>{{ isLoginMode ? 'Iniciar Sesión' : 'Registrarse' }}</h1>
+    <hr class="divider">
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="input-group">
+        <label>Correo Electronico:</label>
+        <input type="email" formControlName="correo" placeholder="Ingrese su correo electrónico">
+      </div>
+
+      <div class="input-group">
+        <label>Contraseña:</label>
+        <input type="password" formControlName="contrasena" placeholder="Ingrese su contraseña">
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn-main">
+          {{ isLoginMode ? 'iniciar sesión' : 'registrarse' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="footer-links">
+      <p *ngIf="isLoginMode">
+        ¿no tienes una cuenta? <span class="link" (click)="toggleMode()">Registrate</span>
+      </p>
+      
+      <p *ngIf="!isLoginMode">
+        ¿ya tienes una cuenta? <span class="link" (click)="toggleMode()">Inicia Sesión</span>
+      </p>
+    </div>
+  </div>
+</div>
