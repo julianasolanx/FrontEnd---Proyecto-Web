@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Copiar dependencias primero para aprovechar caché
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copiar el resto del proyecto
 COPY . .
