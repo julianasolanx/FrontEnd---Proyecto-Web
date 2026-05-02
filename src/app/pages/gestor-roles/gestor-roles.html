@@ -1,0 +1,113 @@
+<div class="gestor-container">
+  <button class="back-arrow" (click)="volver()">⤺</button>
+
+  <div class="main-layout">
+    <!-- PANEL IZQUIERDO -->
+    <section class="left-panel">
+      <h1>Gestor de Roles</h1>
+      <div class="card-blue">
+        <form [formGroup]="panelIzquierdoForm">
+          <label>Buscar rol:</label>
+          <div class="search-container">
+            <input type="text" formControlName="nombreBusqueda" (keyup)="ejecutarBusqueda()" placeholder="Ingrese el nombre...">
+            <button type="button" class="btn-search" (click)="ejecutarBusqueda()">Buscar</button>
+          </div>
+
+          <label>Descripcion:</label>
+          <textarea formControlName="descripcionBusqueda" placeholder="La descripción del rol aparecerá aquí..."></textarea>
+
+          <div class="btn-group">
+            <ng-container *ngIf="!modoEdicionIzquierda">
+              <button type="button" class="btn-black" [disabled]="!rolEnPanelIzquierdo" (click)="ejecutarEliminacion(rolEnPanelIzquierdo)">Eliminar rol</button>
+              <button type="button" class="btn-black" [disabled]="!rolEnPanelIzquierdo" (click)="activarEdicionIzquierda()">Editar rol</button>
+            </ng-container>
+
+            <ng-container *ngIf="modoEdicionIzquierda">
+              <button type="button" class="btn-black" (click)="cancelarEdicionIzquierda()">Cancelar</button>
+              <button type="button" class="btn-black" (click)="guardarEdicionIzquierda()">Guardar</button>
+            </ng-container>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- PANEL DERECHO (LISTA / TABLA VACÍA) -->
+    <section class="right-panel">
+      <div class="rol-list">
+        
+        <!-- TABLA VACÍA -->
+        <div class="empty-state" *ngIf="rolesFiltrados.length === 0">
+          <p>No hay roles registrados para mostrar.</p>
+          <span>Usa el botón "Agregar Rol" para empezar.</span>
+        </div>
+
+        <!-- LISTA DE ROLES (Muestra el ID para identificar duplicados fácilmente) -->
+        <div class="rol-item" *ngFor="let rol of rolesFiltrados" (click)="abrirModalDetalle(rol)">
+          <div class="rol-info">
+            <h3>{{ rol.nombre }} <span style="font-size: 0.8rem; color: #888;">(ID: {{rol.id}})</span></h3>
+            <p>Usado en {{ rol.actividades?.length || 0 }} procesos</p>
+          </div>
+          <span class="arrow-icon">›</span>
+        </div>
+
+      </div>
+      <!-- BOTÓN AGREGAR ROL -->
+      <button type="button" class="btn-add-rol" (click)="abrirModalCrear()">Agregar Rol</button>
+    </section>
+  </div>
+
+  <!-- MODAL 1: AGREGAR ROL EMERGENTE -->
+  <div class="modal-overlay" *ngIf="mostrarModalCrear" (click)="mostrarModalCrear = false">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h2>Crear Nuevo Rol</h2>
+      <form [formGroup]="crearRolForm" (ngSubmit)="guardarNuevoRol()">
+        <label>Nombre del Rol:</label>
+        <input type="text" class="modal-input" formControlName="nombre" placeholder="Ej: Administrador TI">
+        
+        <label>Descripción:</label>
+        <textarea class="modal-input" formControlName="descripcion" placeholder="Indica sus responsabilidades..."></textarea>
+        
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="mostrarModalCrear = false">Cancelar</button>
+          
+          <button type="submit" class="btn-save" [disabled]="crearRolForm.invalid || guardandoRol">
+            {{ guardandoRol ? 'Guardando...' : 'Guardar Rol' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: DETALLE DEL ROL -->
+  <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="mostrarModalDetalle = false">
+    <div class="modal-card detail-card" (click)="$event.stopPropagation()">
+      
+      <!-- MODO LECTURA -->
+      <ng-container *ngIf="!modoEdicionModal">
+        <p class="detail-desc">{{ rolEnModalDetalle?.descripcion }}</p>
+        <hr class="divider">
+        <h4 class="detail-subtitle">USADO EN PROCESOS</h4>
+        <ul class="process-list">
+          <li *ngFor="let p of procesosDelRol">› {{ p.nombre }}</li>
+          <li *ngIf="procesosDelRol.length === 0" class="no-data">No asignado.</li>
+        </ul>
+        <div class="modal-actions-inline">
+          <button class="btn-edit" (click)="activarEdicionModal()">Editar</button>
+          <button class="btn-delete-outline" (click)="ejecutarEliminacion(rolEnModalDetalle)">Eliminar</button>
+        </div>
+      </ng-container>
+
+      <!-- MODO EDICIÓN (Con binding nativo) -->
+      <ng-container *ngIf="modoEdicionModal">
+        <h4 class="detail-subtitle">EDITANDO: {{ rolEnModalDetalle?.nombre }}</h4>
+        <textarea class="modal-input" [value]="descripcionTemporalModal" #descInput (input)="descripcionTemporalModal = descInput.value"></textarea>
+        <div class="modal-actions-inline" style="margin-top: 15px;">
+          <button class="btn-cancel" (click)="modoEdicionModal = false">Cancelar</button>
+          <button class="btn-save" (click)="guardarEdicionModal()">Guardar</button>
+        </div>
+      </ng-container>
+      
+      <p class="warning-text">No se puede eliminar si está asignado a actividades activas.</p>
+    </div>
+  </div>
+</div>

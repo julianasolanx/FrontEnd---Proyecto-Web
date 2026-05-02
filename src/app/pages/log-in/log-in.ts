@@ -38,12 +38,18 @@ export class LogIn {
     if (this.loginForm.invalid) return;
 
     if (this.isLoginMode) {
-      // HU-03: Inicio de sesión[cite: 1]
+      // HU-03: Inicio de sesión
       this.usuarioService.login(this.loginForm.value).subscribe({
-        next: (usuario) => {
-          // Guardar empresaId si existe para futuras peticiones[cite: 1]
-          if (usuario.empresa?.id) {
-            localStorage.setItem('empresaId', usuario.empresa.id.toString());
+        next: (usuario: any) => { // Ponemos :any temporalmente para evitar errores de tipado
+          
+          // Magia aquí: Atrapamos el ID ya sea que venga como objeto o como atributo plano
+          const idDeLaEmpresa = usuario.empresa?.id || usuario.empresaId; 
+          
+          if (idDeLaEmpresa) {
+            localStorage.setItem('empresaId', idDeLaEmpresa.toString());
+            console.log('¡Éxito! Empresa guardada con ID:', idDeLaEmpresa);
+          } else {
+            console.error('ALERTA: El backend no envió ni "empresa.id" ni "empresaId". Revisa tu UsuarioDTO en Spring Boot.');
           }
 
           // Redirección por roles según tu solicitud:
@@ -58,7 +64,7 @@ export class LogIn {
         error: () => alert('Credenciales inválidas')
       });
     } else {
-      // Si está en modo "Registrarse", lo mandamos a la HU-01[cite: 1]
+      // Si está en modo "Registrarse", lo mandamos a la HU-01
       this.router.navigate(['/registrar-empresa']);
     }
   }

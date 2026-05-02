@@ -1,0 +1,18 @@
+.formulario-container { background-color: #90cce6; min-height: 100vh; padding: 50px; display: flex; justify-content: center; align-items: center; position: relative; font-family: Arial, sans-serif; }
+.back-arrow { position: absolute; top: 30px; left: 30px; background: none; border: none; font-size: 3rem; cursor: pointer; color: #111; }
+
+.form-card { background: white; padding: 50px; border-radius: 20px; width: 100%; max-width: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+.page-title { text-align: center; margin-bottom: 30px; font-size: 2rem; color: #000; font-weight: 900; }
+
+.form-group { margin-bottom: 25px; }
+.form-group label { display: block; font-weight: bold; margin-bottom: 10px; color: #222; font-size: 1.05rem; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ccc; font-size: 1rem; box-sizing: border-box; background-color: #fff; transition: border-color 0.3s; }
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #5ab1d6; outline: none; }
+.form-group textarea { height: 120px; resize: none; }
+
+.form-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 35px; }
+.btn-cancelar { background-color: #e0e0e0; color: #333; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+.btn-cancelar:hover { background-color: #ccc; }
+.btn-guardar { background-color: black; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: background 0.2s; }
+.btn-guardar:hover:not(:disabled) { background-color: #333; }
+.btn-guardar:disabled { background-color: #888; cursor: not-allowed; opacity: 0.7; }

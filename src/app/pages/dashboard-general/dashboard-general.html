@@ -1,1 +1,32 @@
-<p>dashboard-general works!</p>
+<div class="dashboard-container">
+  <!-- Botón de Logout superior derecho -->
+  <button class="logout-btn" (click)="logout()" title="Cerrar Sesión">
+    <span class="logout-icon">⎋</span> 
+  </button>
+
+  <div class="content-card">
+    <h1>Visor de procesos empresariales</h1>
+    <hr class="top-divider">
+
+    <p class="subtitle">Escoja una de las siguientes opciones:</p>
+
+    <div class="menu-list">
+      <button class="menu-item" (click)="irAUsuarios()">
+        <span>Usuarios</span>
+        <span class="arrow">›</span>
+      </button>
+
+      <button class="menu-item" (click)="irARoles()">
+        <span>Roles de proceso</span>
+        <span class="arrow">›</span>
+      </button>
+
+      <button class="menu-item" (click)="irAProcesos()">
+        <span>Procesos</span>
+        <span class="arrow">›</span>
+      </button>
+    </div>
+
+    <hr class="bottom-divider">
+  </div>
+</div>  

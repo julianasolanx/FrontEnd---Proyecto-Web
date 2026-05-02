@@ -1,0 +1,64 @@
+<div class="gestor-container">
+  <!-- Flecha para volver al dashboard -->
+  <button class="back-arrow" (click)="irADashboard()">⤺</button>
+
+  <div class="main-content">
+    <!-- Panel Izquierdo: Invitación -->
+    <aside class="invite-panel">
+      <div class="invite-card">
+        <h2>Invitar a un usuario</h2>
+        <form [formGroup]="invitacionForm" (ngSubmit)="invitarUsuario()">
+          <label>Asignar rol de usuario</label>
+          <select formControlName="rol">
+            <option value="ADMINISTRADOR">Administrador</option>
+            <option value="EDITOR">Editor</option>
+            <option value="SOLO_LECTURA">Lector</option>
+          </select>
+
+          <label>Correo electrónico:</label>
+          <input type="email" formControlName="correo" placeholder="Ingrese el correo electrónico">
+
+          <button type="submit" class="btn-invite" [disabled]="invitacionForm.invalid">
+            Invitar
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Panel Derecho: Tabla -->
+    <section class="table-panel">
+      <h1>Gestión de Usuarios</h1>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usuarios">
+              <td>{{ u.nombre || 'Sin nombre' }}</td>
+              <td>{{ u.correo }}</td>
+              <td>
+                <span class="rol-text">{{ u.rol | lowercase }}</span>
+                <button class="icon-btn edit">✎</button>
+              </td>
+              <td>
+                <span [class.status-pending]="u.status === 0">
+                  {{ u.status === 1 ? 'activo' : 'pendiente' }}
+                </span>
+              </td>
+              <td>
+                <button class="icon-btn delete" (click)="eliminarUsuario(u.id)">🗑</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

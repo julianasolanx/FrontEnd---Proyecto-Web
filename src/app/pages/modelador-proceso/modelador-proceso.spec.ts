@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DashboardGeneral } from './dashboard-general';
+import { ModeladorProceso } from './modelador-proceso';
 
-describe('DashboardGeneral', () => {
-  let component: DashboardGeneral;
-  let fixture: ComponentFixture<DashboardGeneral>;
+describe('ModeladorProceso', () => {
+  let component: ModeladorProceso;
+  let fixture: ComponentFixture<ModeladorProceso>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DashboardGeneral],
+      imports: [ModeladorProceso],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DashboardGeneral);
+    fixture = TestBed.createComponent(ModeladorProceso);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
