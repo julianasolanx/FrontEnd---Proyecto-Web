@@ -1,0 +1,157 @@
+/* General container for the process modeler */
+.modelador-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+}
+
+/* Toolbar for adding new elements */
+.toolbar,
+.link-creator {
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.toolbar button,
+.link-creator button,
+.modal-footer button {
+  padding: 8px 12px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.toolbar button:hover,
+.link-creator button:hover,
+.modal-footer button:hover {
+  background-color: #0056b3;
+}
+
+.link-creator select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* Container for the graph diagram */
+.graph-container {
+  flex-grow: 1;
+  position: relative;
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Node styles */
+.node-group rect {
+  fill: #cce5ff;
+  stroke: #007bff;
+  stroke-width: 2px;
+}
+
+.node-group text {
+  fill: #333;
+  font-weight: bold;
+}
+
+/* Specific styles for different node types */
+.node-group[data-nodetype='gateway'] rect {
+  fill: #fff3cd;
+  stroke: #ffc107;
+  transform: rotate(45deg);
+  transform-origin: center center;
+}
+
+.node-group[data-nodetype='event'] rect {
+  fill: #d4edda;
+  stroke: #28a745;
+  rx: 50% !important;
+  ry: 50% !important;
+}
+
+/* Edge/Link styles */
+.edge .line {
+  stroke: #aaa;
+  stroke-width: 2px;
+}
+
+.edge .arrow-head {
+  fill: #aaa;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-body .form-group {
+  margin-bottom: 15px;
+}
+
+.modal-body label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.modal-body input,
+.modal-body select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box; /* Important for padding and width to work together */
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-footer button:last-child {
+  background-color: #6c757d;
+}
+
+.modal-footer button:last-child:hover {
+  background-color: #5a6268;
+}

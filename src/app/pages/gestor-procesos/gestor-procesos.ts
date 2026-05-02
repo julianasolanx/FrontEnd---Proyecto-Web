@@ -17,6 +17,9 @@ export class GestorProcesos implements OnInit {
   procesosFiltrados: Proceso[] = [];
   empresaId: number = 0;
   
+  // VARIABLE PARA CONTROLAR EL ACCESO
+  rolActual: string | null = ''; 
+  
   filtrosForm: FormGroup;
   categoriasDisponibles: string[] = [];
   estadosDisponibles: EstadoProceso[] = ['BORRADOR', 'PUBLICADO', 'INACTIVO'];
@@ -35,6 +38,9 @@ export class GestorProcesos implements OnInit {
   }
 
   ngOnInit(): void {
+    // 1. Detectamos el rol guardado en sesión
+    this.rolActual = localStorage.getItem('rol'); 
+
     const idStored = localStorage.getItem('empresaId');
     if (idStored) {
       this.empresaId = parseInt(idStored);
@@ -70,12 +76,39 @@ export class GestorProcesos implements OnInit {
     this.cdr.detectChanges();
   }
 
-  volver() { this.router.navigate(['/dashboard-general']); }
-  verDetalle(id: number) { this.router.navigate(['/modelador-proceso', id]); }
-  editarProceso(id: number) { this.router.navigate(['/formulario-proceso', id]); }
-  agregarProceso() { this.router.navigate(['/formulario-proceso']); }
+  volver(): void {
+    const rol = localStorage.getItem('rol');
+
+    if (rol === 'LECTOR') {
+      this.router.navigate(['/consultar-procesos']);
+    } else if (rol === 'EDITOR') {
+      this.router.navigate(['/editar-procesos']);
+    } else {
+      this.router.navigate(['/dashboard-general']);
+    }
+  }
+
+  verDetalle(id: number) { 
+    this.router.navigate(['/modelador-proceso', id]); 
+  }
+
+  // PROTECCIÓN DE NAVEGACIÓN PARA LECTOR
+  editarProceso(id: number) { 
+    if (this.rolActual !== 'LECTOR') {
+      this.router.navigate(['/formulario-proceso', id]); 
+    }
+  }
+
+  agregarProceso() { 
+    if (this.rolActual !== 'LECTOR') {
+      this.router.navigate(['/formulario-proceso']); 
+    }
+  }
 
   eliminarProceso(proceso: Proceso): void {
+    // Solo se ejecuta si NO es lector
+    if (this.rolActual === 'LECTOR') return;
+
     if (confirm(`¿Eliminar proceso "${proceso.nombre}"?`)) {
       this.procesoService.eliminar(proceso.id).subscribe({
         next: () => this.cargarProcesos(),

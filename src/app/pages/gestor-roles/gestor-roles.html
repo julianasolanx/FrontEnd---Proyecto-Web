@@ -14,9 +14,10 @@
           </div>
 
           <label>Descripcion:</label>
-          <textarea formControlName="descripcionBusqueda" placeholder="La descripción del rol aparecerá aquí..."></textarea>
+          <textarea formControlName="descripcionBusqueda" placeholder="La descripción del rol aparecerá aquí..." [readonly]="rolActual === 'LECTOR'"></textarea>
 
-          <div class="btn-group">
+          <!-- GRUPO DE BOTONES: Solo visibles si NO es LECTOR -->
+          <div class="btn-group" *ngIf="rolActual !== 'LECTOR'">
             <ng-container *ngIf="!modoEdicionIzquierda">
               <button type="button" class="btn-black" [disabled]="!rolEnPanelIzquierdo" (click)="ejecutarEliminacion(rolEnPanelIzquierdo)">Eliminar rol</button>
               <button type="button" class="btn-black" [disabled]="!rolEnPanelIzquierdo" (click)="activarEdicionIzquierda()">Editar rol</button>
@@ -31,17 +32,15 @@
       </div>
     </section>
 
-    <!-- PANEL DERECHO (LISTA / TABLA VACÍA) -->
+    <!-- PANEL DERECHO -->
     <section class="right-panel">
       <div class="rol-list">
         
-        <!-- TABLA VACÍA -->
         <div class="empty-state" *ngIf="rolesFiltrados.length === 0">
           <p>No hay roles registrados para mostrar.</p>
-          <span>Usa el botón "Agregar Rol" para empezar.</span>
+          <span *ngIf="rolActual !== 'LECTOR'">Usa el botón "Agregar Rol" para empezar.</span>
         </div>
 
-        <!-- LISTA DE ROLES (Muestra el ID para identificar duplicados fácilmente) -->
         <div class="rol-item" *ngFor="let rol of rolesFiltrados" (click)="abrirModalDetalle(rol)">
           <div class="rol-info">
             <h3>{{ rol.nombre }} <span style="font-size: 0.8rem; color: #888;">(ID: {{rol.id}})</span></h3>
@@ -51,13 +50,13 @@
         </div>
 
       </div>
-      <!-- BOTÓN AGREGAR ROL -->
-      <button type="button" class="btn-add-rol" (click)="abrirModalCrear()">Agregar Rol</button>
+      <!-- BOTÓN AGREGAR ROL: Solo visible si NO es LECTOR -->
+      <button *ngIf="rolActual !== 'LECTOR'" type="button" class="btn-add-rol" (click)="abrirModalCrear()">Agregar Rol</button>
     </section>
   </div>
 
-  <!-- MODAL 1: AGREGAR ROL EMERGENTE -->
-  <div class="modal-overlay" *ngIf="mostrarModalCrear" (click)="mostrarModalCrear = false">
+  <!-- MODAL 1: AGREGAR ROL (Solo accesible si no es lector, por seguridad adicional) -->
+  <div class="modal-overlay" *ngIf="mostrarModalCrear && rolActual !== 'LECTOR'" (click)="mostrarModalCrear = false">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <h2>Crear Nuevo Rol</h2>
       <form [formGroup]="crearRolForm" (ngSubmit)="guardarNuevoRol()">
@@ -69,7 +68,6 @@
         
         <div class="modal-actions">
           <button type="button" class="btn-cancel" (click)="mostrarModalCrear = false">Cancelar</button>
-          
           <button type="submit" class="btn-save" [disabled]="crearRolForm.invalid || guardandoRol">
             {{ guardandoRol ? 'Guardando...' : 'Guardar Rol' }}
           </button>
@@ -91,14 +89,16 @@
           <li *ngFor="let p of procesosDelRol">› {{ p.nombre }}</li>
           <li *ngIf="procesosDelRol.length === 0" class="no-data">No asignado.</li>
         </ul>
-        <div class="modal-actions-inline">
+        
+        <!-- ACCIONES DEL MODAL: Solo visibles si NO es LECTOR -->
+        <div class="modal-actions-inline" *ngIf="rolActual !== 'LECTOR'">
           <button class="btn-edit" (click)="activarEdicionModal()">Editar</button>
           <button class="btn-delete-outline" (click)="ejecutarEliminacion(rolEnModalDetalle)">Eliminar</button>
         </div>
       </ng-container>
 
-      <!-- MODO EDICIÓN (Con binding nativo) -->
-      <ng-container *ngIf="modoEdicionModal">
+      <!-- MODO EDICIÓN: Solo accesible si no es LECTOR -->
+      <ng-container *ngIf="modoEdicionModal && rolActual !== 'LECTOR'">
         <h4 class="detail-subtitle">EDITANDO: {{ rolEnModalDetalle?.nombre }}</h4>
         <textarea class="modal-input" [value]="descripcionTemporalModal" #descInput (input)="descripcionTemporalModal = descInput.value"></textarea>
         <div class="modal-actions-inline" style="margin-top: 15px;">
@@ -107,7 +107,7 @@
         </div>
       </ng-container>
       
-      <p class="warning-text">No se puede eliminar si está asignado a actividades activas.</p>
+      <p class="warning-text" *ngIf="rolActual !== 'LECTOR'">No se puede eliminar si está asignado a actividades activas.</p>
     </div>
   </div>
 </div>
