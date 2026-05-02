@@ -1,1 +1,41 @@
-<p>consultar-procesos works!</p>
+<div class="gestor-container">
+  <!-- Botón de cerrar sesión -->
+  <button class="back-arrow" (click)="logout()">⤺</button>
+
+  <div class="main-layout">
+    <!-- PANEL IZQUIERDO (Identidad visual idéntica) -->
+    <section class="left-panel">
+      <h1>Panel de Consulta</h1>
+      <div class="card-blue">
+        <p>Bienvenido al sistema. Como usuario de <strong>Solo Lectura</strong>, puedes visualizar la estructura de los procesos y los roles definidos para la empresa.</p>
+        <br>
+        <button class="btn-black" (click)="logout()">Cerrar Sesión</button>
+      </div>
+    </section>
+
+    <!-- PANEL DERECHO (Tarjetas con flecha ›) -->
+    <section class="right-panel">
+      <div class="rol-list">
+        
+        <!-- Tarjeta Procesos -->
+        <div class="rol-item" (click)="verListaProcesos()">
+          <div class="rol-info">
+            <h3>Visualizar Procesos</h3>
+            <p>Consulta el listado y los detalles de los flujos de trabajo[cite: 1]</p>
+          </div>
+          <span class="arrow-icon">›</span>
+        </div>
+
+        <!-- Tarjeta Roles -->
+        <div class="rol-item" (click)="verListaRoles()">
+          <div class="rol-info">
+            <h3>Visualizar Roles</h3>
+            <p>Consulta los roles y responsabilidades asignados[cite: 1]</p>
+          </div>
+          <span class="arrow-icon">›</span>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</div>

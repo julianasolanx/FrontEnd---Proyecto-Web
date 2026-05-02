@@ -33,11 +33,16 @@
 
       <div class="card-buttons">
         <button class="btn-card" (click)="verDetalle(p.id)">ver detalle</button>
-        <button class="btn-card" (click)="editarProceso(p.id)">editar proceso</button>
-        <button class="btn-card" (click)="eliminarProceso(p)">eliminar</button>
+        
+        <!-- OCULTAR ACCIONES DE EDICIÓN Y ELIMINACIÓN AL LECTOR -->
+        <ng-container *ngIf="rolActual !== 'LECTOR'">
+          <button class="btn-card" (click)="editarProceso(p.id)">editar proceso</button>
+          <button class="btn-card" (click)="eliminarProceso(p)">eliminar</button>
+        </ng-container>
       </div>
     </div>
   </div>
 
-  <button class="btn-agregar" (click)="agregarProceso()">Agregar Proceso</button>
+  <!-- OCULTAR BOTÓN DE AGREGAR AL LECTOR -->
+  <button *ngIf="rolActual !== 'LECTOR'" class="btn-agregar" (click)="agregarProceso()">Agregar Proceso</button>
 </div>

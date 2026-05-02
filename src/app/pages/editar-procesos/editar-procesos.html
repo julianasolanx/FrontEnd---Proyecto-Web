@@ -1,1 +1,41 @@
-<p>editar-procesos works!</p>
+<div class="gestor-container">
+  <!-- Botón de volver/cerrar sesión -->
+  <button class="back-arrow" (click)="logout()">⤺</button>
+
+  <div class="main-layout">
+    <!-- PANEL IZQUIERDO -->
+    <section class="left-panel">
+      <h1>Panel de Edición</h1>
+      <div class="card-blue">
+        <p>Bienvenido al sistema de gestión de procesos. Como <strong>Editor</strong>, puedes gestionar los flujos y los roles de la empresa.</p>
+        <br>
+        <button class="btn-black" (click)="logout()">Cerrar Sesión</button>
+      </div>
+    </section>
+
+    <!-- PANEL DERECHO (TARJETAS) -->
+    <section class="right-panel">
+      <div class="rol-list">
+        
+        <!-- Tarjeta Gestión de Procesos -->
+        <div class="rol-item" (click)="navegarAProcesos()">
+          <div class="rol-info">
+            <h3>Gestión de Procesos</h3>
+            <p>Configura y modela los diagramas de la empresa</p>
+          </div>
+          <span class="arrow-icon">›</span>
+        </div>
+
+        <!-- Tarjeta Gestión de Roles -->
+        <div class="rol-item" (click)="navegarARoles()">
+          <div class="rol-info">
+            <h3>Gestión de Roles</h3>
+            <p>Administra los roles responsables de cada actividad</p>
+          </div>
+          <span class="arrow-icon">›</span>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</div>
