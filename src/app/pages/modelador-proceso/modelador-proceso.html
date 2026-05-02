@@ -1,0 +1,111 @@
+<div class="modelador-container">
+  <div class="toolbar">
+    <button (click)="addActivity()">Add Activity</button>
+    <button (click)="addGateway()">Add Gateway</button>
+  </div>
+
+  <div class="link-creator">
+    <label for="source-node">Source:</label>
+    <select id="source-node" [(ngModel)]="linkSource">
+      <option *ngFor="let node of nodes" [value]="node.id">{{ node.label }}</option>
+    </select>
+    <label for="target-node">Target:</label>
+    <select id="target-node" [(ngModel)]="linkTarget">
+      <option *ngFor="let node of nodes" [value]="node.id">{{ node.label }}</option>
+    </select>
+    <button (click)="createLink()">Create Link</button>
+  </div>
+
+  <div class="graph-container">
+    <ngx-graph
+      class="chart-container"
+      [nodes]="nodes"
+      [links]="links"
+      [layout]="layout"
+      [update$]="update$"
+      [center$]="center$"
+      [zoomToFit$]="zoomToFit$"
+      (select)="onNodeClick($event)"
+    >
+      <ng-template #defsTemplate>
+        <svg:marker
+          id="arrow"
+          viewBox="0 -5 10 10"
+          refX="8"
+          refY="0"
+          markerWidth="4"
+          markerHeight="4"
+          orient="auto"
+        >
+          <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
+        </svg:marker>
+      </ng-template>
+
+      <ng-template #nodeTemplate let-node>
+        <svg:g class="node-group" [attr.data-nodetype]="node.data.nodeType">
+          <svg:rect
+            [attr.width]="node.width"
+            [attr.height]="node.height"
+            [attr.rx]="node.data.nodeType === 'gateway' ? '10' : '5'"
+            [attr.ry]="node.data.nodeType === 'gateway' ? '10' : '5'"
+          />
+          <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">
+            {{ node.label }}
+          </svg:text>
+        </svg:g>
+      </ng-template>
+
+      <ng-template #linkTemplate let-link>
+        <svg:g class="edge">
+          <svg:path class="line" marker-end="url(#arrow)"></svg:path>
+          <svg:text class="edge-label" text-anchor="middle">
+            <textPath class="text-path" [attr.href]="'#' + link.id" startOffset="50%">
+              {{link.label}}
+            </textPath>
+          </svg:text>
+        </svg:g>
+      </ng-template>
+    </ngx-graph>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Node</h2>
+      </div>
+      <div class="modal-body" *ngIf="selectedNode">
+        <div *ngIf="selectedNode.data.nodeType === 'activity'">
+          <div class="form-group">
+            <label for="node-name">Name:</label>
+            <input id="node-name" type="text" [(ngModel)]="editableNodeData.name" />
+          </div>
+          <div class="form-group">
+            <label for="node-type">Type:</label>
+            <select id="node-type" [(ngModel)]="editableNodeData.type">
+              <option *ngFor="let type of activityTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="node-role">Role:</label>
+            <select id="node-role" [(ngModel)]="editableNodeData.role">
+              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div *ngIf="selectedNode.data.nodeType === 'gateway'">
+          <div class="form-group">
+            <label for="gateway-type">Gateway Type:</label>
+            <select id="gateway-type" [(ngModel)]="editableNodeData.gatewayType">
+              <option *ngFor="let type of gatewayTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="saveNodeChanges()">Save</button>
+        <button (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
