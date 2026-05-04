@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8080/api'; // La URL de tu Spring Boot
+const BASE_URL = '/api';
 
 export const API_ENDPOINTS = {
   actividades: `${BASE_URL}/actividades`,
