@@ -1,57 +1,91 @@
-<div class="modelador-container">
+<div class="modelador-wrapper">
+
+  <!-- HEADER -->
+  <div class="modelador-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <h1 class="header-title">Modelador de Proceso</h1>
+    <span class="header-badge" *ngIf="cargando">Cargando...</span>
+  </div>
+
+  <!-- TOOLBAR -->
   <div class="toolbar">
-    <button (click)="addActivity()">Add Activity</button>
-    <button (click)="addGateway()">Add Gateway</button>
+    <div class="toolbar-group">
+      <span class="toolbar-label">Agregar</span>
+      <button class="btn-tool btn-actividad" (click)="abrirModalActividad()">
+        ＋ Actividad
+      </button>
+      <button class="btn-tool btn-gateway" (click)="abrirModalGateway()">
+        ◇ Gateway
+      </button>
+    </div>
+
+    <div class="toolbar-divider"></div>
+
+    <div class="toolbar-group">
+      <span class="toolbar-label">Conectar nodos</span>
+      <select class="tool-select" [(ngModel)]="linkSource">
+        <option [value]="null">Origen</option>
+        <option *ngFor="let n of nodes" [value]="n.id">{{ n.label }}</option>
+      </select>
+      <span class="arrow-icon">→</span>
+      <select class="tool-select" [(ngModel)]="linkTarget">
+        <option [value]="null">Destino</option>
+        <option *ngFor="let n of nodes" [value]="n.id">{{ n.label }}</option>
+      </select>
+      <input class="tool-input" [(ngModel)]="linkCondicion" placeholder="Condición (opcional)" />
+      <button class="btn-tool btn-link" (click)="crearArco()" [disabled]="guardando">
+        Crear arco
+      </button>
+    </div>
+
+    <div class="toolbar-spacer"></div>
+    <span class="hint-text">Haz clic en un nodo para editarlo</span>
   </div>
 
-  <div class="link-creator">
-    <label for="source-node">Source:</label>
-    <select id="source-node" [(ngModel)]="linkSource">
-      <option *ngFor="let node of nodes" [value]="node.id">{{ node.label }}</option>
-    </select>
-    <label for="target-node">Target:</label>
-    <select id="target-node" [(ngModel)]="linkTarget">
-      <option *ngFor="let node of nodes" [value]="node.id">{{ node.label }}</option>
-    </select>
-    <button (click)="createLink()">Create Link</button>
+  <!-- LOADING STATE -->
+  <div class="loading-state" *ngIf="cargando">
+    <div class="spinner"></div>
+    <p>Cargando elementos del proceso...</p>
   </div>
 
-  <div class="graph-container">
+  <!-- GRAPH -->
+  <div class="graph-container" *ngIf="!cargando">
+    <div class="empty-graph" *ngIf="nodes.length === 0">
+      <p>Este proceso no tiene elementos aún.</p>
+      <p>Usa los botones de arriba para agregar actividades y gateways.</p>
+    </div>
+
     <ngx-graph
+      *ngIf="nodes.length > 0"
       class="chart-container"
       [nodes]="nodes"
       [links]="links"
       [layout]="layout"
       [update$]="update$"
-      [center$]="center$"
       [zoomToFit$]="zoomToFit$"
       (select)="onNodeClick($event)"
     >
       <ng-template #defsTemplate>
-        <svg:marker
-          id="arrow"
-          viewBox="0 -5 10 10"
-          refX="8"
-          refY="0"
-          markerWidth="4"
-          markerHeight="4"
-          orient="auto"
-        >
+        <svg:marker id="arrow" viewBox="0 -5 10 10" refX="9" refY="0"
+          markerWidth="6" markerHeight="6" orient="auto">
           <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
         </svg:marker>
       </ng-template>
 
       <ng-template #nodeTemplate let-node>
-        <svg:g class="node-group" [attr.data-nodetype]="node.data.nodeType">
+        <svg:g class="node-wrap" [attr.data-type]="node.data.nodeType" [attr.data-tipo]="node.data.tipo">
           <svg:rect
-            [attr.width]="node.width"
-            [attr.height]="node.height"
-            [attr.rx]="node.data.nodeType === 'gateway' ? '10' : '5'"
-            [attr.ry]="node.data.nodeType === 'gateway' ? '10' : '5'"
+            [attr.width]="node.dimension?.width || 160"
+            [attr.height]="node.dimension?.height || 50"
+            [attr.rx]="node.data.tipo === 'EVENTO_INICIO' || node.data.tipo === 'EVENTO_FIN' ? 25 : (node.data.nodeType === 'gateway' ? 8 : 6)"
+            [attr.ry]="node.data.tipo === 'EVENTO_INICIO' || node.data.tipo === 'EVENTO_FIN' ? 25 : (node.data.nodeType === 'gateway' ? 8 : 6)"
           />
-          <svg:text alignment-baseline="central" [attr.x]="10" [attr.y]="node.height / 2">
-            {{ node.label }}
-          </svg:text>
+          <svg:text
+            [attr.x]="(node.dimension?.width || 160) / 2"
+            [attr.y]="(node.dimension?.height || 50) / 2"
+            text-anchor="middle"
+            dominant-baseline="central"
+          >{{ node.label }}</svg:text>
         </svg:g>
       </ng-template>
 
@@ -59,8 +93,8 @@
         <svg:g class="edge">
           <svg:path class="line" marker-end="url(#arrow)"></svg:path>
           <svg:text class="edge-label" text-anchor="middle">
-            <textPath class="text-path" [attr.href]="'#' + link.id" startOffset="50%">
-              {{link.label}}
+            <textPath [attr.href]="'#' + link.id" startOffset="50%">
+              {{ link.label }}
             </textPath>
           </svg:text>
         </svg:g>
@@ -68,43 +102,131 @@
     </ngx-graph>
   </div>
 
-  <div class="modal-overlay" *ngIf="showModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Edit Node</h2>
-      </div>
-      <div class="modal-body" *ngIf="selectedNode">
-        <div *ngIf="selectedNode.data.nodeType === 'activity'">
-          <div class="form-group">
-            <label for="node-name">Name:</label>
-            <input id="node-name" type="text" [(ngModel)]="editableNodeData.name" />
-          </div>
-          <div class="form-group">
-            <label for="node-type">Type:</label>
-            <select id="node-type" [(ngModel)]="editableNodeData.type">
-              <option *ngFor="let type of activityTypes" [value]="type">{{ type }}</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="node-role">Role:</label>
-            <select id="node-role" [(ngModel)]="editableNodeData.role">
-              <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
-            </select>
-          </div>
-        </div>
+</div>
 
-        <div *ngIf="selectedNode.data.nodeType === 'gateway'">
-          <div class="form-group">
-            <label for="gateway-type">Gateway Type:</label>
-            <select id="gateway-type" [(ngModel)]="editableNodeData.gatewayType">
-              <option *ngFor="let type of gatewayTypes" [value]="type">{{ type }}</option>
-            </select>
-          </div>
-        </div>
+<!-- ===== MODAL: EDITAR NODO ===== -->
+<div class="modal-overlay" *ngIf="showEditModal" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ selectedNode?.data?.nodeType === 'actividad' ? 'Editar Actividad' : 'Editar Gateway' }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">✕</button>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedNode">
+
+      <div class="field-group">
+        <label>Nombre</label>
+        <input [(ngModel)]="editableNode.nombre" placeholder="Nombre del elemento" />
       </div>
-      <div class="modal-footer">
-        <button (click)="saveNodeChanges()">Save</button>
-        <button (click)="closeModal()">Cancel</button>
+
+      <ng-container *ngIf="selectedNode.data.nodeType === 'actividad'">
+        <div class="field-group">
+          <label>Tipo de actividad</label>
+          <select [(ngModel)]="editableNode.tipo">
+            <option *ngFor="let t of activityTypes" [value]="t">{{ getTipoLabel(t) }}</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>Descripción</label>
+          <textarea [(ngModel)]="editableNode.descripcion" rows="3" placeholder="Descripción de la actividad"></textarea>
+        </div>
+        <div class="field-group">
+          <label>Rol responsable</label>
+          <select [(ngModel)]="editableNode.rolResponsableId">
+            <option [ngValue]="undefined">— Sin rol —</option>
+            <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.nombre }}</option>
+          </select>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="selectedNode.data.nodeType === 'gateway'">
+        <div class="field-group">
+          <label>Tipo de gateway</label>
+          <select [(ngModel)]="editableNode.tipo">
+            <option *ngFor="let t of gatewayTypes" [value]="t">{{ getTipoLabel(t) }}</option>
+          </select>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-danger" (click)="eliminarNodo()" [disabled]="guardando">Eliminar</button>
+      <div class="footer-right">
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarCambiosNodo()" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: NUEVA ACTIVIDAD ===== -->
+<div class="modal-overlay" *ngIf="showAddActividadModal" (click)="showAddActividadModal = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Nueva Actividad</h2>
+      <button class="btn-close" (click)="showAddActividadModal = false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>Nombre *</label>
+        <input [(ngModel)]="newActividad.nombre" placeholder="Nombre de la actividad" />
+      </div>
+      <div class="field-group">
+        <label>Tipo</label>
+        <select [(ngModel)]="newActividad.tipo">
+          <option *ngFor="let t of activityTypes" [value]="t">{{ getTipoLabel(t) }}</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="newActividad.descripcion" rows="3" placeholder="Descripción opcional"></textarea>
+      </div>
+      <div class="field-group">
+        <label>Rol responsable</label>
+        <select [(ngModel)]="newActividad.rolResponsableId">
+          <option [ngValue]="undefined">— Sin rol —</option>
+          <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.nombre }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="footer-right">
+        <button class="btn-secondary" (click)="showAddActividadModal = false">Cancelar</button>
+        <button class="btn-primary" (click)="guardarActividad()" [disabled]="guardando || !newActividad.nombre.trim()">
+          {{ guardando ? 'Guardando...' : 'Agregar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: NUEVO GATEWAY ===== -->
+<div class="modal-overlay" *ngIf="showAddGatewayModal" (click)="showAddGatewayModal = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Nuevo Gateway</h2>
+      <button class="btn-close" (click)="showAddGatewayModal = false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>Nombre *</label>
+        <input [(ngModel)]="newGateway.nombre" placeholder="Nombre del gateway" />
+      </div>
+      <div class="field-group">
+        <label>Tipo</label>
+        <select [(ngModel)]="newGateway.tipo">
+          <option *ngFor="let t of gatewayTypes" [value]="t">{{ getTipoLabel(t) }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="footer-right">
+        <button class="btn-secondary" (click)="showAddGatewayModal = false">Cancelar</button>
+        <button class="btn-primary" (click)="guardarGateway()" [disabled]="guardando || !newGateway.nombre.trim()">
+          {{ guardando ? 'Guardando...' : 'Agregar' }}
+        </button>
       </div>
     </div>
   </div>
