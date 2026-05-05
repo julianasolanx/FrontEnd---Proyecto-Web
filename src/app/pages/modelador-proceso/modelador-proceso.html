@@ -9,37 +9,47 @@
 
   <!-- TOOLBAR -->
   <div class="toolbar">
-    <div class="toolbar-group">
-      <span class="toolbar-label">Agregar</span>
-      <button class="btn-tool btn-actividad" (click)="abrirModalActividad()">
-        ＋ Actividad
-      </button>
-      <button class="btn-tool btn-gateway" (click)="abrirModalGateway()">
-        ◇ Gateway
-      </button>
+    <div class="toolbar-row">
+      <div class="toolbar-group">
+        <span class="toolbar-label">Agregar</span>
+        <button class="btn-tool btn-actividad" (click)="abrirModalActividad()">＋ Actividad</button>
+        <button class="btn-tool btn-gateway" (click)="abrirModalGateway()">◇ Gateway</button>
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <div class="toolbar-group">
+        <span class="toolbar-label">Diseño</span>
+        <button class="btn-tool btn-save-layout" (click)="guardarPosiciones()" [disabled]="guardando || nodes.length === 0">
+          💾 Guardar diseño
+        </button>
+        <button class="btn-tool btn-clear" (click)="limpiarDiagrama()" [disabled]="guardando || nodes.length === 0">
+          🗑 Limpiar todo
+        </button>
+      </div>
+
+      <div class="toolbar-spacer"></div>
+      <span class="hint-text">Haz clic en un nodo para editarlo</span>
     </div>
 
-    <div class="toolbar-divider"></div>
-
-    <div class="toolbar-group">
-      <span class="toolbar-label">Conectar nodos</span>
-      <select class="tool-select" [(ngModel)]="linkSource">
-        <option [value]="null">Origen</option>
-        <option *ngFor="let n of nodes" [value]="n.id">{{ n.label }}</option>
-      </select>
-      <span class="arrow-icon">→</span>
-      <select class="tool-select" [(ngModel)]="linkTarget">
-        <option [value]="null">Destino</option>
-        <option *ngFor="let n of nodes" [value]="n.id">{{ n.label }}</option>
-      </select>
-      <input class="tool-input" [(ngModel)]="linkCondicion" placeholder="Condición (opcional)" />
-      <button class="btn-tool btn-link" (click)="crearArco()" [disabled]="guardando">
-        Crear arco
-      </button>
+    <div class="toolbar-row">
+      <div class="toolbar-group">
+        <span class="toolbar-label">Conectar nodos</span>
+        <select class="tool-select" [(ngModel)]="linkSource">
+          <option [value]="null">Origen</option>
+          <option *ngFor="let n of nodes" [value]="n.id">{{ n.label }}</option>
+        </select>
+        <span class="arrow-icon">→</span>
+        <select class="tool-select" [(ngModel)]="linkTarget">
+          <option [value]="null">Destino</option>
+          <option *ngFor="let n of nodes" [value]="n.id">{{ n.label }}</option>
+        </select>
+        <input class="tool-input" [(ngModel)]="linkCondicion" placeholder="Condición (opcional)" />
+        <button class="btn-tool btn-link" (click)="crearArco()" [disabled]="guardando">
+          Crear arco
+        </button>
+      </div>
     </div>
-
-    <div class="toolbar-spacer"></div>
-    <span class="hint-text">Haz clic en un nodo para editarlo</span>
   </div>
 
   <!-- LOADING STATE -->
@@ -56,6 +66,7 @@
     </div>
 
     <ngx-graph
+      #graphRef
       *ngIf="nodes.length > 0"
       class="chart-container"
       [nodes]="nodes"
@@ -66,9 +77,9 @@
       (select)="onNodeClick($event)"
     >
       <ng-template #defsTemplate>
-        <svg:marker id="arrow" viewBox="0 -5 10 10" refX="9" refY="0"
-          markerWidth="6" markerHeight="6" orient="auto">
-          <svg:path d="M0,-5L10,0L0,5" class="arrow-head" />
+        <svg:marker id="arrow" viewBox="0 -5 10 10" refX="8" refY="0"
+          markerWidth="8" markerHeight="8" orient="auto">
+          <svg:path d="M0,-5L10,0L0,5" fill="#64748b" />
         </svg:marker>
       </ng-template>
 
@@ -91,14 +102,23 @@
 
       <ng-template #linkTemplate let-link>
         <svg:g class="edge">
-          <svg:path class="line" marker-end="url(#arrow)"></svg:path>
-          <svg:text class="edge-label" text-anchor="middle">
-            <textPath [attr.href]="'#' + link.id" startOffset="50%">
+          <svg:path
+            class="line"
+            [attr.id]="link.id"
+            [attr.d]="link.line"
+            stroke="#94a3b8"
+            stroke-width="2"
+            fill="none"
+            marker-end="url(#arrow)"
+          ></svg:path>
+          <svg:text *ngIf="link.label" class="edge-label">
+            <textPath [attr.href]="'#' + link.id" startOffset="50%" text-anchor="middle">
               {{ link.label }}
             </textPath>
           </svg:text>
         </svg:g>
       </ng-template>
+
     </ngx-graph>
   </div>
 

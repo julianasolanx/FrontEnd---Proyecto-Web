@@ -106,13 +106,15 @@ export class GestorProcesos implements OnInit {
   }
 
   eliminarProceso(proceso: Proceso): void {
-    // Solo se ejecuta si NO es lector
     if (this.rolActual === 'LECTOR') return;
 
     if (confirm(`¿Eliminar proceso "${proceso.nombre}"?`)) {
       this.procesoService.eliminar(proceso.id).subscribe({
         next: () => this.cargarProcesos(),
-        error: () => this.cargarProcesos()
+        error: (err) => {
+          const msg = err?.error?.message || 'No se pudo eliminar el proceso.';
+          alert(msg);
+        }
       });
     }
   }

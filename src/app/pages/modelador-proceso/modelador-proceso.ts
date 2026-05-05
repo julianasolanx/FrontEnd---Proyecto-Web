@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Inject, PLATFORM_ID, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Edge, Node, Layout, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { Subject, forkJoin, of } from 'rxjs';
@@ -50,6 +50,8 @@ export class ModeladorProceso implements OnInit {
 
   newActividad = { nombre: '', tipo: 'TAREA' as TipoActividad, descripcion: '', rolResponsableId: undefined as number | undefined };
   newGateway = { nombre: '', tipo: 'EXCLUSIVO' as TipoGateway };
+
+  @ViewChild('graphRef') graphRef: any;
 
   linkSource: string | null = null;
   linkTarget: string | null = null;
@@ -122,9 +124,7 @@ export class ModeladorProceso implements OnInit {
           },
         }));
 
-        this.nodes = nodes;
-
-        this.links = arcos
+        const links = arcos
           .filter((a: any) => (a.actividadOrigenId || a.gatewayOrigenId) && (a.actividadDestinoId || a.gatewayDestinoId))
           .map((a: any) => ({
             id: `arco_${a.id}`,
@@ -133,6 +133,48 @@ export class ModeladorProceso implements OnInit {
             label: a.condicion || '',
             data: { backendId: a.id, condicion: a.condicion },
           }));
+
+        const savedRaw = localStorage.getItem(`proceso_layout_${this.procesoId}`);
+        let savedPos: Record<string, { x: number; y: number }> = {};
+        try { if (savedRaw) savedPos = JSON.parse(savedRaw); } catch (_) {}
+        const hasSaved = nodes.every(n => !!savedPos[n.id]);
+
+        if (hasSaved && nodes.length > 0) {
+          this.layout = {
+            run: (graph: any) => {
+              let minX = 0, minY = 0, maxX = 400, maxY = 300;
+              graph.nodes?.forEach((n: any) => {
+                const p = savedPos[n.id];
+                if (!p) return;
+                const w = (n.dimension?.width ?? 160);
+                const h = (n.dimension?.height ?? 50);
+                n.position = { x: p.x, y: p.y };
+                minX = Math.min(minX, p.x - w / 2);
+                minY = Math.min(minY, p.y - h / 2);
+                maxX = Math.max(maxX, p.x + w / 2);
+                maxY = Math.max(maxY, p.y + h / 2);
+              });
+              graph.width  = maxX - minX + 100;
+              graph.height = maxY - minY + 100;
+              const edges: any[] = graph.edges ?? graph.links ?? [];
+              edges.forEach((edge: any) => {
+                const sp = savedPos[edge.source];
+                const tp = savedPos[edge.target];
+                if (!sp || !tp) return;
+                const mx = (sp.x + tp.x) / 2;
+                const my = (sp.y + tp.y) / 2;
+                edge.points = [{ x: sp.x, y: sp.y }, { x: mx, y: my }, { x: tp.x, y: tp.y }];
+                edge.midPoint = { x: mx, y: my };
+              });
+              return of(graph);
+            }
+          } as any;
+        } else {
+          this.layout = 'dagre';
+        }
+
+        this.nodes = nodes;
+        this.links = links;
 
         console.log('[modelador] cargando = false, nodes:', this.nodes.length);
         this.cargando = false;
@@ -339,6 +381,68 @@ export class ModeladorProceso implements OnInit {
         try { this.zoomToFit$.next({ autoCenter: true } as any); } catch (_) {}
       }, 600);
     }, 100);
+  }
+
+  guardarPosiciones(): void {
+    // Read positions from ngx-graph's internal graph state, not from this.nodes
+    const internalNodes: any[] = this.graphRef?.graph?.nodes ?? [];
+    if (internalNodes.length === 0) {
+      alert('No hay posiciones para guardar todavía.');
+      return;
+    }
+    const layout: Record<string, { x: number; y: number }> = {};
+    internalNodes.forEach((n: any) => {
+      if (n.id && n.position) {
+        layout[n.id] = { x: n.position.x, y: n.position.y };
+      } else if (n.id && n.x !== undefined) {
+        layout[n.id] = { x: n.x, y: n.y };
+      }
+    });
+    localStorage.setItem(`proceso_layout_${this.procesoId}`, JSON.stringify(layout));
+    alert('Posiciones guardadas correctamente.');
+  }
+
+
+  limpiarDiagrama(): void {
+    if (this.guardando) return;
+    if (!confirm('¿Eliminar TODOS los elementos del diagrama? Esta acción no se puede deshacer.')) return;
+    this.guardando = true;
+
+    const deleteArcos$ = this.links.length > 0
+      ? forkJoin(this.links.map(l => this.arcoService.eliminar(l.data['backendId'])))
+      : of([]);
+
+    deleteArcos$.subscribe({
+      next: () => {
+        const actividades = this.nodes.filter(n => n.data['nodeType'] === 'actividad');
+        const gateways = this.nodes.filter(n => n.data['nodeType'] === 'gateway');
+
+        const deletes = [
+          ...actividades.map(n => this.actividadService.eliminar(n.data['backendId'])),
+          ...gateways.map(n => this.gatewayService.eliminar(n.data['backendId'])),
+        ];
+
+        const deleteAll$ = deletes.length > 0 ? forkJoin(deletes) : of([]);
+        deleteAll$.subscribe({
+          next: () => {
+            this.nodes = [];
+            this.links = [];
+            this.layout = 'dagre';
+            localStorage.removeItem(`proceso_layout_${this.procesoId}`);
+            this.guardando = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.guardando = false;
+            alert('Ocurrió un error al eliminar algunos elementos.');
+          },
+        });
+      },
+      error: () => {
+        this.guardando = false;
+        alert('Ocurrió un error al eliminar los arcos.');
+      },
+    });
   }
 
   volver(): void {
