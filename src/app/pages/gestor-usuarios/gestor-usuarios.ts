@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsuarioService, EmailInvitacionRequest } from '../../services/usuario.service';
-import { Usuario, RolUsuario } from '../../models/usuario.model';
+import { Usuario } from '../../models/usuario.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -57,9 +57,9 @@ export class GestorUsuarios implements OnInit {
         next: () => {
           alert('Invitación enviada con éxito');
           this.invitacionForm.reset({ rol: 'SOLO_LECTURA' });
-          this.cargarUsuarios(); // Recargar para ver el estado "pendiente"
+          this.cargarUsuarios(); // Recarga la lista para mostrar al nuevo usuario
         },
-        error: (err) => alert('Error al enviar invitación')
+        error: () => alert('Error al enviar invitación')
       });
     }
   }
@@ -67,13 +67,16 @@ export class GestorUsuarios implements OnInit {
   eliminarUsuario(id: number): void {
     if (confirm('¿Está seguro de eliminar este usuario?')) {
       this.usuarioService.eliminar(id).subscribe({
-        next: () => this.usuarios = this.usuarios.filter(u => u.id !== id),
+        next: () => {
+          this.usuarios = this.usuarios.filter(u => u.id !== id);
+        },
         error: (err) => console.error('Error al eliminar', err)
       });
     }
   }
 
   irADashboard(): void {
+    // Redirección fija sin importar el rol
     this.router.navigate(['/dashboard-general']);
   }
 }

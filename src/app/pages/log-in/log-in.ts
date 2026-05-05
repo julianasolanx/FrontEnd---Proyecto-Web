@@ -13,7 +13,6 @@ import { CommonModule } from '@angular/common';
 })
 export class LogIn {
   loginForm: FormGroup;
-  isLoginMode: boolean = true; // Empieza en "Iniciar Sesión"
 
   constructor(
     private fb: FormBuilder,
@@ -26,10 +25,6 @@ export class LogIn {
     });
   }
 
-  toggleMode() {
-    this.isLoginMode = !this.isLoginMode;
-  }
-
   volver() {
     this.router.navigate(['/']);
   }
@@ -37,35 +32,21 @@ export class LogIn {
   onSubmit() {
     if (this.loginForm.invalid) return;
 
-    if (this.isLoginMode) {
-      // HU-03: Inicio de sesión
-      this.usuarioService.login(this.loginForm.value).subscribe({
-        next: (usuario: any) => { // Ponemos :any temporalmente para evitar errores de tipado
-          
-          // Magia aquí: Atrapamos el ID ya sea que venga como objeto o como atributo plano
-          const idDeLaEmpresa = usuario.empresa?.id || usuario.empresaId; 
-          
-          if (idDeLaEmpresa) {
-            localStorage.setItem('empresaId', idDeLaEmpresa.toString());
-            console.log('¡Éxito! Empresa guardada con ID:', idDeLaEmpresa);
-          } else {
-            console.error('ALERTA: El backend no envió ni "empresa.id" ni "empresaId". Revisa tu UsuarioDTO en Spring Boot.');
-          }
+    this.usuarioService.login(this.loginForm.value).subscribe({
+      next: (usuario: any) => {
+        // Guardamos el ID de la empresa en el almacenamiento local
+        const idDeLaEmpresa = usuario.empresa?.id || usuario.empresaId;
 
-          // Redirección por roles según tu solicitud:
-          if (usuario.rol === 'ADMINISTRADOR') {
-            this.router.navigate(['/dashboard-general']);
-          } else if (usuario.rol === 'EDITOR') {
-            this.router.navigate(['/editar-procesos']);
-          } else if (usuario.rol === 'SOLO_LECTURA') {
-            this.router.navigate(['/consultar-procesos']);
-          }
-        },
-        error: () => alert('Credenciales inválidas')
-      });
-    } else {
-      // Si está en modo "Registrarse", lo mandamos a la HU-01
-      this.router.navigate(['/registrar-empresa']);
-    }
+        if (idDeLaEmpresa) {
+          localStorage.setItem('empresaId', idDeLaEmpresa.toString());
+        }
+
+        // Redirección única: No importa el rol, todos van a la misma página
+        this.router.navigate(['/dashboard-general']);
+      },
+      error: () => {
+        alert('Credenciales inválidas. Por favor intente de nuevo.');
+      }
+    });
   }
 }

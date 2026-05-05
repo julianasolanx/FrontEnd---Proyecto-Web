@@ -1,5 +1,5 @@
 .dashboard-container {
-  background-color: #90cce6; /* Fondo azul claro de la imagen */
+  background-color: #90cce6;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -21,7 +21,7 @@
 
 .content-card {
   background-color: white;
-  border-radius: 50px; /* Bordes muy redondeados */
+  border-radius: 50px;
   padding: 60px 80px;
   width: 90%;
   max-width: 900px;
@@ -52,8 +52,8 @@ h1 {
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 2px; /* Espaciado mínimo para que parezcan unidos */
-  background-color: #f2eded; /* Color de fondo gris claro de la imagen */
+  gap: 2px;
+  background-color: #f2eded;
   border-radius: 20px;
   overflow: hidden;
 }

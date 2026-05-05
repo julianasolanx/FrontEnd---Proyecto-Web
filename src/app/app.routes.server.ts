@@ -18,14 +18,6 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
-    path: 'consultar-procesos',
-    renderMode: RenderMode.Client,
-  },
-  {
-    path: 'editar-procesos',
-    renderMode: RenderMode.Client,
-  },
-  {
     path: 'gestor-procesos',
     renderMode: RenderMode.Client,
   },

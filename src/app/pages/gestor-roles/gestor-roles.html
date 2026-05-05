@@ -14,10 +14,9 @@
           </div>
 
           <label>Descripcion:</label>
-          <textarea formControlName="descripcionBusqueda" placeholder="La descripción del rol aparecerá aquí..." [readonly]="rolActual === 'LECTOR'"></textarea>
+          <textarea formControlName="descripcionBusqueda" placeholder="La descripción del rol aparecerá aquí..."></textarea>
 
-          <!-- GRUPO DE BOTONES: Solo visibles si NO es LECTOR -->
-          <div class="btn-group" *ngIf="rolActual !== 'LECTOR'">
+          <div class="btn-group">
             <ng-container *ngIf="!modoEdicionIzquierda">
               <button type="button" class="btn-black" [disabled]="!rolEnPanelIzquierdo" (click)="ejecutarEliminacion(rolEnPanelIzquierdo)">Eliminar rol</button>
               <button type="button" class="btn-black" [disabled]="!rolEnPanelIzquierdo" (click)="activarEdicionIzquierda()">Editar rol</button>
@@ -35,10 +34,9 @@
     <!-- PANEL DERECHO -->
     <section class="right-panel">
       <div class="rol-list">
-        
         <div class="empty-state" *ngIf="rolesFiltrados.length === 0">
           <p>No hay roles registrados para mostrar.</p>
-          <span *ngIf="rolActual !== 'LECTOR'">Usa el botón "Agregar Rol" para empezar.</span>
+          <span>Usa el botón "Agregar Rol" para empezar.</span>
         </div>
 
         <div class="rol-item" *ngFor="let rol of rolesFiltrados" (click)="abrirModalDetalle(rol)">
@@ -48,15 +46,13 @@
           </div>
           <span class="arrow-icon">›</span>
         </div>
-
       </div>
-      <!-- BOTÓN AGREGAR ROL: Solo visible si NO es LECTOR -->
-      <button *ngIf="rolActual !== 'LECTOR'" type="button" class="btn-add-rol" (click)="abrirModalCrear()">Agregar Rol</button>
+      <button type="button" class="btn-add-rol" (click)="abrirModalCrear()">Agregar Rol</button>
     </section>
   </div>
 
-  <!-- MODAL 1: AGREGAR ROL (Solo accesible si no es lector, por seguridad adicional) -->
-  <div class="modal-overlay" *ngIf="mostrarModalCrear && rolActual !== 'LECTOR'" (click)="mostrarModalCrear = false">
+  <!-- MODAL 1: AGREGAR ROL -->
+  <div class="modal-overlay" *ngIf="mostrarModalCrear" (click)="mostrarModalCrear = false">
     <div class="modal-card" (click)="$event.stopPropagation()">
       <h2>Crear Nuevo Rol</h2>
       <form [formGroup]="crearRolForm" (ngSubmit)="guardarNuevoRol()">
@@ -80,7 +76,6 @@
   <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="mostrarModalDetalle = false">
     <div class="modal-card detail-card" (click)="$event.stopPropagation()">
       
-      <!-- MODO LECTURA -->
       <ng-container *ngIf="!modoEdicionModal">
         <p class="detail-desc">{{ rolEnModalDetalle?.descripcion }}</p>
         <hr class="divider">
@@ -90,15 +85,13 @@
           <li *ngIf="procesosDelRol.length === 0" class="no-data">No asignado.</li>
         </ul>
         
-        <!-- ACCIONES DEL MODAL: Solo visibles si NO es LECTOR -->
-        <div class="modal-actions-inline" *ngIf="rolActual !== 'LECTOR'">
+        <div class="modal-actions-inline">
           <button class="btn-edit" (click)="activarEdicionModal()">Editar</button>
           <button class="btn-delete-outline" (click)="ejecutarEliminacion(rolEnModalDetalle)">Eliminar</button>
         </div>
       </ng-container>
 
-      <!-- MODO EDICIÓN: Solo accesible si no es LECTOR -->
-      <ng-container *ngIf="modoEdicionModal && rolActual !== 'LECTOR'">
+      <ng-container *ngIf="modoEdicionModal">
         <h4 class="detail-subtitle">EDITANDO: {{ rolEnModalDetalle?.nombre }}</h4>
         <textarea class="modal-input" [value]="descripcionTemporalModal" #descInput (input)="descripcionTemporalModal = descInput.value"></textarea>
         <div class="modal-actions-inline" style="margin-top: 15px;">
@@ -107,7 +100,7 @@
         </div>
       </ng-container>
       
-      <p class="warning-text" *ngIf="rolActual !== 'LECTOR'">No se puede eliminar si está asignado a actividades activas.</p>
+      <p class="warning-text">No se puede eliminar si está asignado a actividades activas.</p>
     </div>
   </div>
 </div>

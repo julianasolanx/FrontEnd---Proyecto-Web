@@ -32,9 +32,6 @@ export class GestorRoles implements OnInit {
   guardandoRol: boolean = false;
   empresaId: number = 0;
   
-  // VARIABLE CRÍTICA PARA EL LECTOR
-  rolActual: string | null = ''; 
-  
   descripcionTemporalModal: string = '';
 
   constructor(
@@ -56,9 +53,6 @@ export class GestorRoles implements OnInit {
   }
 
   ngOnInit(): void {
-    // Obtenemos el rol del usuario al cargar el componente
-    this.rolActual = localStorage.getItem('rol'); 
-    
     const idStored = localStorage.getItem('empresaId');
     if (idStored) {
       this.empresaId = parseInt(idStored);
@@ -77,18 +71,10 @@ export class GestorRoles implements OnInit {
   }
 
   volver(): void {
-    const rol = localStorage.getItem('rol'); 
-
-    if (rol === 'LECTOR') {
-      this.router.navigate(['/consultar-procesos']);
-    } else if (rol === 'EDITOR') {
-      this.router.navigate(['/editar-procesos']);
-    } else {
-      this.router.navigate(['/dashboard-general']);
-    }
+    // Redirección fija al dashboard general
+    this.router.navigate(['/dashboard-general']);
   }
 
-  // --- PANEL IZQUIERDO ---
   ejecutarBusqueda(): void {
     const term = this.panelIzquierdoForm.get('nombreBusqueda')?.value.toLowerCase().trim();
     
@@ -106,11 +92,7 @@ export class GestorRoles implements OnInit {
         this.rolEnPanelIzquierdo = exacto;
         this.panelIzquierdoForm.patchValue({ descripcionBusqueda: exacto.descripcion });
         this.modoEdicionIzquierda = false;
-        
-        // Bloqueo adicional por código: si es LECTOR nunca habilitamos el campo
-        if (this.rolActual !== 'LECTOR') {
-            this.panelIzquierdoForm.get('descripcionBusqueda')?.disable();
-        }
+        this.panelIzquierdoForm.get('descripcionBusqueda')?.disable();
       } else {
         this.rolEnPanelIzquierdo = null;
         this.panelIzquierdoForm.patchValue({ descripcionBusqueda: '' });
@@ -120,8 +102,7 @@ export class GestorRoles implements OnInit {
   }
 
   activarEdicionIzquierda(): void {
-    // Solo permitimos habilitar edición si no es lector
-    if (this.rolEnPanelIzquierdo && this.rolActual !== 'LECTOR') {
+    if (this.rolEnPanelIzquierdo) {
       this.modoEdicionIzquierda = true;
       this.panelIzquierdoForm.get('descripcionBusqueda')?.enable();
     }
@@ -136,7 +117,7 @@ export class GestorRoles implements OnInit {
   }
 
   guardarEdicionIzquierda(): void {
-    if (this.rolEnPanelIzquierdo && this.panelIzquierdoForm.valid && this.rolActual !== 'LECTOR') {
+    if (this.rolEnPanelIzquierdo && this.panelIzquierdoForm.valid) {
       const dto: RolProcesoRequest = {
         nombre: this.rolEnPanelIzquierdo.nombre,
         descripcion: this.panelIzquierdoForm.get('descripcionBusqueda')?.value,
@@ -151,16 +132,14 @@ export class GestorRoles implements OnInit {
     }
   }
 
-  // --- MODAL CREAR ---
   abrirModalCrear(): void {
-    if (this.rolActual === 'LECTOR') return; // Seguridad extra
     this.crearRolForm.reset();
     this.mostrarModalCrear = true;
     this.cdr.detectChanges(); 
   }
 
   guardarNuevoRol(): void {
-    if (this.crearRolForm.invalid || this.guardandoRol || this.rolActual === 'LECTOR') return;
+    if (this.crearRolForm.invalid || this.guardandoRol) return;
     this.guardandoRol = true;
 
     const dto: RolProcesoRequest = {
@@ -169,23 +148,21 @@ export class GestorRoles implements OnInit {
       empresaId: this.empresaId
     };
 
-    this.mostrarModalCrear = false;
-
     this.rolService.crear(dto).subscribe({
       next: () => {
+        this.mostrarModalCrear = false;
         this.crearRolForm.reset();
         this.guardandoRol = false;
         this.cargarRoles(); 
       },
       error: () => {
-        this.crearRolForm.reset();
+        this.mostrarModalCrear = false;
         this.guardandoRol = false;
         this.cargarRoles(); 
       }
     });
   }
 
-  // --- MODAL DETALLE Y ELIMINAR ---
   abrirModalDetalle(rol: RolProceso): void {
     this.rolEnModalDetalle = rol;
     this.mostrarModalDetalle = true;
@@ -201,15 +178,13 @@ export class GestorRoles implements OnInit {
   }
 
   activarEdicionModal(): void {
-    if (this.rolActual !== 'LECTOR') {
-        this.modoEdicionModal = true;
-        this.descripcionTemporalModal = this.rolEnModalDetalle?.descripcion || '';
-        this.cdr.detectChanges();
-    }
+    this.modoEdicionModal = true;
+    this.descripcionTemporalModal = this.rolEnModalDetalle?.descripcion || '';
+    this.cdr.detectChanges();
   }
 
   guardarEdicionModal(): void {
-    if (this.rolEnModalDetalle && this.descripcionTemporalModal.trim() !== '' && this.rolActual !== 'LECTOR') {
+    if (this.rolEnModalDetalle && this.descripcionTemporalModal.trim() !== '') {
       const dto: RolProcesoRequest = {
         nombre: this.rolEnModalDetalle.nombre,
         descripcion: this.descripcionTemporalModal,
@@ -224,20 +199,11 @@ export class GestorRoles implements OnInit {
   }
 
   ejecutarEliminacion(rol: RolProceso | null): void {
-    if (!rol || this.rolActual === 'LECTOR') return;
+    if (!rol) return;
 
     if (confirm(`¿Eliminar definitivamente el rol "${rol.nombre}"?`)) {
       this.mostrarModalDetalle = false;
-      if (this.rolEnPanelIzquierdo?.id === rol.id) {
-        this.rolEnPanelIzquierdo = null;
-        this.panelIzquierdoForm.reset();
-        this.panelIzquierdoForm.get('descripcionBusqueda')?.disable();
-        this.modoEdicionIzquierda = false;
-      }
-
-      this.roles = this.roles.filter(r => r.id !== rol.id);
-      this.ejecutarBusqueda();
-
+      
       this.rolService.eliminar(rol.id).subscribe({
         next: () => { this.cargarRoles(); },
         error: () => { this.cargarRoles(); }

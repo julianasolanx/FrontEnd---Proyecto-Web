@@ -56,7 +56,7 @@ input {
 .actions {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .btn-main {
@@ -67,15 +67,4 @@ input {
   border: none;
   cursor: pointer;
   font-size: 1rem;
-}
-
-.footer-links {
-  margin-top: 30px;
-  font-size: 0.95rem;
-}
-
-.link {
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: underline;
 }

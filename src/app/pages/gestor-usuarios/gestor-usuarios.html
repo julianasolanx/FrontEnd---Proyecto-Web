@@ -36,7 +36,7 @@
               <th>Correo</th>
               <th>Rol</th>
               <th>Estado</th>
-              <th></th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -45,7 +45,7 @@
               <td>{{ u.correo }}</td>
               <td>
                 <span class="rol-text">{{ u.rol | lowercase }}</span>
-                <button class="icon-btn edit">✎</button>
+                <button class="icon-btn edit" title="Editar Rol">✎</button>
               </td>
               <td>
                 <span [class.status-pending]="u.status === 0">
@@ -53,7 +53,7 @@
                 </span>
               </td>
               <td>
-                <button class="icon-btn delete" (click)="eliminarUsuario(u.id)">🗑</button>
+                <button class="icon-btn delete" (click)="eliminarUsuario(u.id)" title="Eliminar Usuario">🗑</button>
               </td>
             </tr>
           </tbody>

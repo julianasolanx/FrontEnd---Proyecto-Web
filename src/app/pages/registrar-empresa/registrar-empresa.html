@@ -1,6 +1,6 @@
 <div class="page-container">
   <div class="form-card">
-    <button class="back-button" (click)='volver()'>←</button>
+    <button class="back-button" (click)="volver()">←</button>
     
     <h1>Registrar empresa</h1>
     <hr class="header-line">
@@ -18,7 +18,7 @@
           <input type="email" formControlName="correoAdmin" placeholder="Ingrese el correo electrónico">
 
           <label>Contraseña:</label>
-          <input type="password" formControlName="contrasena" placeholder="Ingrese la contraseña">
+          <input type="password" formControlName="contrasena" placeholder="Ingrese la contraseña (mín. 6 caracteres)">
         </div>
 
         <!-- Columna Derecha: Empresa -->
@@ -34,9 +34,14 @@
         </div>
       </div>
 
+      <!-- Mensaje de error visual en el formulario -->
+      <div class="error-container" *ngIf="registroForm.invalid && registroForm.touched">
+        <p>* Por favor, complete todos los campos obligatorios correctamente.</p>
+      </div>
+
       <div class="footer-actions">
-        <button type="submit" class="btn-submit" [disabled]="registroForm.invalid">
-          registrar empresa
+        <button type="submit" class="btn-submit" [disabled]="registroForm.invalid || cargando">
+          {{ cargando ? 'Registrando...' : 'registrar empresa' }}
         </button>
       </div>
     </form>
