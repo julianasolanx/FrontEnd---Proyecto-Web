@@ -110,6 +110,8 @@ export class ModeladorProceso implements OnInit {
             descripcion: a.descripcion,
             rolResponsableId: a.rolResponsableId,
             rolNombre: this.getRolNombre(a.rolResponsableId),
+            posicionX: a.posicionX ?? null,
+            posicionY: a.posicionY ?? null,
           },
         }));
 
@@ -121,6 +123,8 @@ export class ModeladorProceso implements OnInit {
             backendId: g.id,
             nombre: g.nombre,
             tipo: g.tipo,
+            posicionX: g.posicionX ?? null,
+            posicionY: g.posicionY ?? null,
           },
         }));
 
@@ -134,52 +138,20 @@ export class ModeladorProceso implements OnInit {
             data: { backendId: a.id, condicion: a.condicion },
           }));
 
-        const savedRaw = localStorage.getItem(`proceso_layout_${this.procesoId}`);
-        let savedPos: Record<string, { x: number; y: number }> = {};
-        try { if (savedRaw) savedPos = JSON.parse(savedRaw); } catch (_) {}
-        const hasSaved = nodes.every(n => !!savedPos[n.id]);
-
-        if (hasSaved && nodes.length > 0) {
-          this.layout = {
-            run: (graph: any) => {
-              let minX = 0, minY = 0, maxX = 400, maxY = 300;
-              graph.nodes?.forEach((n: any) => {
-                const p = savedPos[n.id];
-                if (!p) return;
-                const w = (n.dimension?.width ?? 160);
-                const h = (n.dimension?.height ?? 50);
-                n.position = { x: p.x, y: p.y };
-                minX = Math.min(minX, p.x - w / 2);
-                minY = Math.min(minY, p.y - h / 2);
-                maxX = Math.max(maxX, p.x + w / 2);
-                maxY = Math.max(maxY, p.y + h / 2);
-              });
-              graph.width  = maxX - minX + 100;
-              graph.height = maxY - minY + 100;
-              const edges: any[] = graph.edges ?? graph.links ?? [];
-              edges.forEach((edge: any) => {
-                const sp = savedPos[edge.source];
-                const tp = savedPos[edge.target];
-                if (!sp || !tp) return;
-                const mx = (sp.x + tp.x) / 2;
-                const my = (sp.y + tp.y) / 2;
-                edge.points = [{ x: sp.x, y: sp.y }, { x: mx, y: my }, { x: tp.x, y: tp.y }];
-                edge.midPoint = { x: mx, y: my };
-              });
-              return of(graph);
-            }
-          } as any;
-        } else {
-          this.layout = 'dagre';
-        }
-
+        this.layout = 'dagre';
         this.nodes = nodes;
         this.links = links;
 
         console.log('[modelador] cargando = false, nodes:', this.nodes.length);
         this.cargando = false;
         this.cdr.detectChanges();
-        setTimeout(() => this.refreshGraph(), 300);
+
+        const hasPosiciones = nodes.some(n => n.data.posicionX != null && n.data.posicionY != null);
+        if (hasPosiciones) {
+          setTimeout(() => this.aplicarPosicionesGuardadas(), 800);
+        } else {
+          setTimeout(() => this.refreshGraph(), 300);
+        }
       },
       error: (e: any) => {
         console.error('[modelador] forkJoin error:', e);
@@ -384,22 +356,129 @@ export class ModeladorProceso implements OnInit {
   }
 
   guardarPosiciones(): void {
-    // Read positions from ngx-graph's internal graph state, not from this.nodes
     const internalNodes: any[] = this.graphRef?.graph?.nodes ?? [];
     if (internalNodes.length === 0) {
       alert('No hay posiciones para guardar todavía.');
       return;
     }
-    const layout: Record<string, { x: number; y: number }> = {};
+
+    this.guardando = true;
+    const updates: any[] = [];
+
     internalNodes.forEach((n: any) => {
-      if (n.id && n.position) {
-        layout[n.id] = { x: n.position.x, y: n.position.y };
-      } else if (n.id && n.x !== undefined) {
-        layout[n.id] = { x: n.x, y: n.y };
+      const x: number = n.position?.x ?? n.x;
+      const y: number = n.position?.y ?? n.y;
+      if (x == null || y == null) return;
+
+      const ourNode = this.nodes.find(on => on.id === n.id);
+      if (!ourNode) return;
+      const { nodeType, backendId } = ourNode.data;
+
+      if (nodeType === 'actividad') {
+        updates.push(
+          this.actividadService.actualizar(backendId, {
+            nombre: ourNode.data.nombre,
+            tipo: ourNode.data.tipo,
+            descripcion: ourNode.data.descripcion,
+            procesoId: this.procesoId,
+            rolResponsableId: ourNode.data.rolResponsableId,
+            posicionX: x,
+            posicionY: y,
+          })
+        );
+      } else if (nodeType === 'gateway') {
+        updates.push(
+          this.gatewayService.actualizar(backendId, {
+            nombre: ourNode.data.nombre,
+            tipo: ourNode.data.tipo,
+            procesoId: this.procesoId,
+            posicionX: x,
+            posicionY: y,
+          })
+        );
       }
     });
-    localStorage.setItem(`proceso_layout_${this.procesoId}`, JSON.stringify(layout));
-    alert('Posiciones guardadas correctamente.');
+
+    if (updates.length === 0) {
+      this.guardando = false;
+      alert('No hay posiciones para guardar todavía.');
+      return;
+    }
+
+    forkJoin([...updates]).subscribe({
+      next: () => {
+        this.guardando = false;
+        alert('Posiciones guardadas correctamente.');
+      },
+      error: () => {
+        this.guardando = false;
+        alert('Error al guardar las posiciones.');
+      },
+    });
+  }
+
+  aplicarPosicionesGuardadas(): void {
+    const hasPosiciones = this.nodes.some(n => n.data.posicionX != null && n.data.posicionY != null);
+    if (!hasPosiciones) {
+      this.refreshGraph();
+      return;
+    }
+
+    const nodeMap = new Map(this.nodes.map(n => [n.id, n.data]));
+
+    this.layout = {
+      run: (graph: any) => {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+        graph.nodes?.forEach((n: any) => {
+          const data = nodeMap.get(n.id);
+          const x: number = data?.posicionX;
+          const y: number = data?.posicionY;
+          const w = n.dimension?.width ?? 160;
+          const h = n.dimension?.height ?? 50;
+
+          if (x != null && y != null) {
+            n.position = { x, y };
+          }
+
+          const px = n.position?.x ?? 0;
+          const py = n.position?.y ?? 0;
+          minX = Math.min(minX, px - w / 2);
+          minY = Math.min(minY, py - h / 2);
+          maxX = Math.max(maxX, px + w / 2);
+          maxY = Math.max(maxY, py + h / 2);
+        });
+
+        // Calcular rutas de arcos basadas en posiciones de nodos
+        const posMap = new Map<string, { x: number; y: number }>();
+        graph.nodes?.forEach((n: any) => posMap.set(n.id, n.position ?? { x: 0, y: 0 }));
+
+        const edges = graph.edges ?? graph.links ?? [];
+        edges.forEach((edge: any) => {
+          const src = posMap.get(edge.source);
+          const tgt = posMap.get(edge.target);
+          if (src && tgt) {
+            edge.points = [
+              { x: src.x, y: src.y },
+              { x: tgt.x, y: tgt.y },
+            ];
+          }
+        });
+
+        graph.width  = isFinite(maxX - minX) ? maxX - minX + 200 : 800;
+        graph.height = isFinite(maxY - minY) ? maxY - minY + 200 : 600;
+
+        return of(graph);
+      }
+    } as any;
+
+    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.update$.next(true);
+      setTimeout(() => {
+        try { this.zoomToFit$.next({ autoCenter: true } as any); } catch (_) {}
+      }, 400);
+    }, 50);
   }
 
 
@@ -428,7 +507,6 @@ export class ModeladorProceso implements OnInit {
             this.nodes = [];
             this.links = [];
             this.layout = 'dagre';
-            localStorage.removeItem(`proceso_layout_${this.procesoId}`);
             this.guardando = false;
             this.cdr.detectChanges();
           },

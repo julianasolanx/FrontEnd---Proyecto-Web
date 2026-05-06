@@ -11,13 +11,17 @@ export interface Actividad {
   status: number;
   proceso: Proceso;
   rolResponsable?: RolProceso;
+  posicionX?: number;
+  posicionY?: number;
 }
- 
+
 export interface CrearActividad {
   nombre: string;
   descripcion: string;
   tipo: TipoActividad;
   procesoId: number;
   rolResponsableId?: number;
+  posicionX?: number;
+  posicionY?: number;
 }
  
