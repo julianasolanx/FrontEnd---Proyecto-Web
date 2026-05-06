@@ -101,7 +101,14 @@
       </ng-template>
 
       <ng-template #linkTemplate let-link>
-        <svg:g class="edge">
+        <svg:g class="edge" style="cursor:pointer" (click)="onArcoClick(link, $event)">
+          <!-- área invisible más ancha para facilitar el clic -->
+          <svg:path
+            [attr.d]="link.line"
+            stroke="transparent"
+            stroke-width="12"
+            fill="none"
+          ></svg:path>
           <svg:path
             class="line"
             [attr.id]="link.id"

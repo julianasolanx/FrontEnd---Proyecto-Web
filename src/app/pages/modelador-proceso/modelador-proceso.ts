@@ -138,7 +138,15 @@ export class ModeladorProceso implements OnInit {
             data: { backendId: a.id, condicion: a.condicion },
           }));
 
-        this.layout = 'dagre';
+        const hasPosiciones = nodes.some(n => n.data.posicionX != null && n.data.posicionY != null);
+
+        if (hasPosiciones) {
+          const nodeMap = new Map(nodes.map(n => [n.id, n.data]));
+          this.layout = this.buildCustomLayout(nodeMap);
+        } else {
+          this.layout = 'dagre';
+        }
+
         this.nodes = nodes;
         this.links = links;
 
@@ -146,9 +154,14 @@ export class ModeladorProceso implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges();
 
-        const hasPosiciones = nodes.some(n => n.data.posicionX != null && n.data.posicionY != null);
         if (hasPosiciones) {
-          setTimeout(() => this.aplicarPosicionesGuardadas(), 800);
+          // Re-ejecutar layout después de que ngx-graph conozca las dimensiones reales
+          setTimeout(() => {
+            this.update$.next(true);
+            setTimeout(() => {
+              try { this.zoomToFit$.next({ autoCenter: true } as any); } catch (_) {}
+            }, 400);
+          }, 400);
         } else {
           setTimeout(() => this.refreshGraph(), 300);
         }
@@ -341,6 +354,52 @@ export class ModeladorProceso implements OnInit {
     }
   }
 
+  onArcoClick(link: any, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.guardando) return;
+    if (!confirm(`¿Eliminar este arco${link.label ? ' "' + link.label + '"' : ''}?`)) return;
+    this.guardando = true;
+    this.arcoService.eliminar(link.data.backendId).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.cargarDatos(); // recarga completa para estado visual consistente
+      },
+      error: () => { this.guardando = false; },
+    });
+  }
+
+  // Midpoint perpendicular al segmento — offset > 0 curva hacia un lado, < 0 al otro
+  private curvedMidpoint(
+    src: { x: number; y: number },
+    tgt: { x: number; y: number },
+    offset: number
+  ): { x: number; y: number } {
+    const mx = (src.x + tgt.x) / 2;
+    const my = (src.y + tgt.y) / 2;
+    if (offset === 0) return { x: mx, y: my };
+    const dx = tgt.x - src.x;
+    const dy = tgt.y - src.y;
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
+    return { x: mx + (-dy / len) * offset, y: my + (dx / len) * offset };
+  }
+
+  // Punto en el borde del nodo en dirección hacia `from`
+  private borderPoint(
+    from: { x: number; y: number },
+    nodeCenter: { x: number; y: number },
+    dim: { width: number; height: number }
+  ): { x: number; y: number } {
+    const dx = from.x - nodeCenter.x;
+    const dy = from.y - nodeCenter.y;
+    if (Math.abs(dx) < 0.001 && Math.abs(dy) < 0.001) return nodeCenter;
+    const hw = dim.width / 2;
+    const hh = dim.height / 2;
+    const tx = Math.abs(dx) > 0 ? hw / Math.abs(dx) : Infinity;
+    const ty = Math.abs(dy) > 0 ? hh / Math.abs(dy) : Infinity;
+    const t = Math.min(tx, ty);
+    return { x: nodeCenter.x + dx * t, y: nodeCenter.y + dy * t };
+  }
+
   cerrarModal(): void {
     this.showEditModal = false;
     this.selectedNode = null;
@@ -417,18 +476,11 @@ export class ModeladorProceso implements OnInit {
     });
   }
 
-  aplicarPosicionesGuardadas(): void {
-    const hasPosiciones = this.nodes.some(n => n.data.posicionX != null && n.data.posicionY != null);
-    if (!hasPosiciones) {
-      this.refreshGraph();
-      return;
-    }
-
-    const nodeMap = new Map(this.nodes.map(n => [n.id, n.data]));
-
-    this.layout = {
+  private buildCustomLayout(nodeMap: Map<string, any>): any {
+    return {
       run: (graph: any) => {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        let autoIdx = 0;
 
         graph.nodes?.forEach((n: any) => {
           const data = nodeMap.get(n.id);
@@ -439,46 +491,78 @@ export class ModeladorProceso implements OnInit {
 
           if (x != null && y != null) {
             n.position = { x, y };
+          } else {
+            n.position = { x: 200 + (autoIdx % 3) * 220, y: 100 + Math.floor(autoIdx / 3) * 120 };
+            autoIdx++;
           }
 
-          const px = n.position?.x ?? 0;
-          const py = n.position?.y ?? 0;
+          const px = n.position.x;
+          const py = n.position.y;
           minX = Math.min(minX, px - w / 2);
           minY = Math.min(minY, py - h / 2);
           maxX = Math.max(maxX, px + w / 2);
           maxY = Math.max(maxY, py + h / 2);
         });
 
-        // Calcular rutas de arcos basadas en posiciones de nodos
-        const posMap = new Map<string, { x: number; y: number }>();
-        graph.nodes?.forEach((n: any) => posMap.set(n.id, n.position ?? { x: 0, y: 0 }));
+        const nodeInfoMap = new Map<string, { position: { x: number; y: number }; dim: { width: number; height: number } }>();
+        graph.nodes?.forEach((n: any) => nodeInfoMap.set(n.id, {
+          position: n.position,
+          dim: n.dimension ?? { width: 160, height: 50 },
+        }));
 
         const edges = graph.edges ?? graph.links ?? [];
-        edges.forEach((edge: any) => {
-          const src = posMap.get(edge.source);
-          const tgt = posMap.get(edge.target);
-          if (src && tgt) {
-            edge.points = [
-              { x: src.x, y: src.y },
-              { x: tgt.x, y: tgt.y },
-            ];
+        // Detectar arcos bidireccionales
+        const reverseSet = new Set<string>();
+        edges.forEach((e: any) => {
+          if (edges.some((r: any) => r.source === e.target && r.target === e.source)) {
+            reverseSet.add(`${e.source}-${e.target}`);
           }
         });
+
+        edges.forEach((edge: any) => {
+          const srcInfo = nodeInfoMap.get(edge.source);
+          const tgtInfo = nodeInfoMap.get(edge.target);
+          if (srcInfo && tgtInfo) {
+            const srcPt = this.borderPoint(tgtInfo.position, srcInfo.position, srcInfo.dim);
+            const tgtPt = this.borderPoint(srcInfo.position, tgtInfo.position, tgtInfo.dim);
+            const isBidirectional = reverseSet.has(`${edge.source}-${edge.target}`);
+            const mid = this.curvedMidpoint(srcPt, tgtPt, isBidirectional ? 50 : 0);
+            edge.points = [srcPt, mid, tgtPt];
+            edge.textPath = `M ${srcPt.x},${srcPt.y} L ${tgtPt.x},${tgtPt.y}`;
+            edge.oldTextPath = edge.textPath;
+          }
+        });
+
+        // ngx-graph lee edgeLabels (no graph.edges) para calcular las rutas SVG
+        graph.edgeLabels = graph.edges;
 
         graph.width  = isFinite(maxX - minX) ? maxX - minX + 200 : 800;
         graph.height = isFinite(maxY - minY) ? maxY - minY + 200 : 600;
 
         return of(graph);
-      }
-    } as any;
-
-    this.cdr.detectChanges();
-    setTimeout(() => {
-      this.update$.next(true);
-      setTimeout(() => {
-        try { this.zoomToFit$.next({ autoCenter: true } as any); } catch (_) {}
-      }, 400);
-    }, 50);
+      },
+      // Llamado por ngx-graph durante el drag de un nodo para redibujar arcos conectados
+      updateEdge: (graph: any, edge: any) => {
+        const srcNode = graph.nodes.find((n: any) => n.id === edge.source || n.id === edge.source?.id);
+        const tgtNode = graph.nodes.find((n: any) => n.id === edge.target || n.id === edge.target?.id);
+        if (srcNode?.position && tgtNode?.position) {
+          const srcDim = srcNode.dimension ?? { width: 160, height: 50 };
+          const tgtDim = tgtNode.dimension ?? { width: 160, height: 50 };
+          const srcPt = this.borderPoint(tgtNode.position, srcNode.position, srcDim);
+          const tgtPt = this.borderPoint(srcNode.position, tgtNode.position, tgtDim);
+          const srcId = edge.source?.id ?? edge.source;
+          const tgtId = edge.target?.id ?? edge.target;
+          const isBidirectional = graph.edges?.some(
+            (e: any) => (e.source?.id ?? e.source) === tgtId && (e.target?.id ?? e.target) === srcId
+          );
+          const mid = this.curvedMidpoint(srcPt, tgtPt, isBidirectional ? 50 : 0);
+          edge.points = [srcPt, mid, tgtPt];
+          edge.oldTextPath = edge.textPath;
+          edge.textPath = `M ${srcPt.x},${srcPt.y} L ${tgtPt.x},${tgtPt.y}`;
+        }
+        return of(graph);
+      },
+    };
   }
 
 
