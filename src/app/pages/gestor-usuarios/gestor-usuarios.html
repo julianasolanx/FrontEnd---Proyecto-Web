@@ -1,60 +1,123 @@
 <div class="gestor-container">
   <!-- Flecha para volver al dashboard -->
-  <button class="back-arrow" (click)="irADashboard()">⤺</button>
+  <button class="back-arrow" (click)="irADashboard()" title="Volver al Dashboard">← Volver</button>
 
   <div class="main-content">
-    <!-- Panel Izquierdo: Invitación -->
+    <!-- Panel Izquierdo: Formulario de Invitación -->
     <aside class="invite-panel">
       <div class="invite-card">
-        <h2>Invitar a un usuario</h2>
+        <h2>Invitar Usuario</h2>
+        <p class="subtitle-text">Completa el formulario para invitar a un nuevo usuario</p>
+
+        <!-- Mensaje de Éxito -->
+        <div class="alert alert-success" *ngIf="mensajeExito">{{ mensajeExito }}</div>
+
+        <!-- Mensaje de Error -->
+        <div class="alert alert-error" *ngIf="mensajeError">{{ mensajeError }}</div>
+
         <form [formGroup]="invitacionForm" (ngSubmit)="invitarUsuario()">
-          <label>Asignar rol de usuario</label>
-          <select formControlName="rol">
-            <option value="ADMINISTRADOR">Administrador</option>
-            <option value="EDITOR">Editor</option>
-            <option value="SOLO_LECTURA">Lector</option>
-          </select>
+          <div class="form-group">
+            <label for="correo">Correo Electrónico</label>
+            <input
+              id="correo"
+              type="email"
+              formControlName="correo"
+              placeholder="usuario@ejemplo.com"
+              [class.input-error]="invitacionForm.get('correo')?.invalid && invitacionForm.get('correo')?.touched"
+            />
+            <span
+              class="error-text"
+              *ngIf="invitacionForm.get('correo')?.hasError('required') && invitacionForm.get('correo')?.touched"
+            >
+              El correo es requerido
+            </span>
+            <span
+              class="error-text"
+              *ngIf="invitacionForm.get('correo')?.hasError('email') && invitacionForm.get('correo')?.touched"
+            >
+              Ingrese un correo válido
+            </span>
+          </div>
 
-          <label>Correo electrónico:</label>
-          <input type="email" formControlName="correo" placeholder="Ingrese el correo electrónico">
+          <div class="form-group">
+            <label for="rol">Rol de Usuario</label>
+            <select id="rol" formControlName="rol" class="select-input">
+              <option value="ADMINISTRADOR">Administrador</option>
+              <option value="EDITOR">Editor</option>
+              <option value="SOLO_LECTURA">Lector</option>
+            </select>
+            <p class="rol-description">
+              <small id="rol-desc"> <strong>Lector:</strong> Solo visualiza procesos </small>
+            </p>
+          </div>
 
-          <button type="submit" class="btn-invite" [disabled]="invitacionForm.invalid">
-            Invitar
+          <button
+            type="submit"
+            class="btn-invite"
+            [disabled]="invitacionForm.invalid || cargandoFormulario"
+          >
+            <span *ngIf="!cargandoFormulario">Enviar Invitación</span>
+            <span *ngIf="cargandoFormulario">Enviando...</span>
           </button>
         </form>
+
+        <hr class="divider" />
+        <p class="info-text">
+          <strong>ℹ Nota:</strong> Se generará una contraseña automática y se enviará al correo del
+          usuario junto con su rol asignado.
+        </p>
       </div>
     </aside>
 
-    <!-- Panel Derecho: Tabla -->
+    <!-- Panel Derecho: Tabla de Usuarios -->
     <section class="table-panel">
-      <h1>Gestión de Usuarios</h1>
+      <div class="table-header">
+        <h1>Gestión de Usuarios</h1>
+        <p class="total-users">Total: <strong>{{ usuarios.length }}</strong> usuario(s)</p>
+      </div>
+
       <div class="table-wrapper">
-        <table>
+        <table class="users-table">
           <thead>
             <tr>
               <th>Nombre</th>
               <th>Correo</th>
               <th>Rol</th>
-              <th>Estado</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let u of usuarios">
-              <td>{{ u.nombre || 'Sin nombre' }}</td>
-              <td>{{ u.correo }}</td>
-              <td>
-                <span class="rol-text">{{ u.rol | lowercase }}</span>
-                <button class="icon-btn edit" title="Editar Rol">✎</button>
+            <!-- Estado de carga -->
+            <tr *ngIf="cargandoTabla" class="loading-row">
+              <td colspan="4">
+                <span class="loading-spinner"></span>
+                <span>Cargando usuarios...</span>
               </td>
-              <td>
-                <span [class.status-pending]="u.status === 0">
-                  {{ u.status === 1 ? 'activo' : 'pendiente' }}
+            </tr>
+
+            <!-- Usuarios cargados -->
+            <tr *ngFor="let usuario of usuarios" class="user-row">
+              <td class="nombre-cell">{{ usuario.nombre || 'Sin asignar' }}</td>
+              <td class="correo-cell">{{ usuario.correo }}</td>
+              <td class="rol-cell">
+                <span [class]="'rol-badge ' + getRolBadgeClass(usuario.rol)">
+                  {{ usuario.rol | lowercase }}
                 </span>
               </td>
-              <td>
-                <button class="icon-btn delete" (click)="eliminarUsuario(u.id)" title="Eliminar Usuario">🗑</button>
+              <td class="acciones-cell">
+                <button
+                  class="btn-delete"
+                  (click)="eliminarUsuario(usuario.id, usuario.correo)"
+                  title="Eliminar usuario"
+                >
+                  🗑️ Eliminar
+                </button>
               </td>
+            </tr>
+
+            <!-- Sin usuarios -->
+            <tr *ngIf="!cargandoTabla && usuarios.length === 0" class="empty-row">
+              <td colspan="4">No hay usuarios registrados aún</td>
             </tr>
           </tbody>
         </table>
