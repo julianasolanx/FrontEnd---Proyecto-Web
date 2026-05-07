@@ -18,6 +18,13 @@ export interface EmailInvitacionRequest {
   subject: string;
   message: string;
 }
+
+
+export interface InvitarUsuarioRequest {   
+  correo: string;
+  rol: string;
+  empresaId: number;
+}
  
 @Injectable({
   providedIn: 'root'
@@ -62,9 +69,14 @@ export class UsuarioService {
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/${id}`);
   }
- 
+
   /** POST /api/usuarios/enviar-invitacion */
   enviarInvitacion(dto: EmailInvitacionRequest): Observable<string> {
     return this.http.post(`${this.url}/enviar-invitacion`, dto, { responseType: 'text' });
+  }
+
+  /** POST /api/usuarios/invitar */
+  invitar(dto: InvitarUsuarioRequest): Observable<Usuario> {   // ← NUEVO
+    return this.http.post<Usuario>(`${this.url}/invitar`, dto);
   }
 }
