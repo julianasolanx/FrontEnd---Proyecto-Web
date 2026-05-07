@@ -155,7 +155,7 @@ export class ModeladorProceso implements OnInit {
         this.cdr.detectChanges();
 
         if (hasPosiciones) {
-          // Re-ejecutar layout después de que ngx-graph conozca las dimensiones reales
+        
           setTimeout(() => {
             this.update$.next(true);
             setTimeout(() => {
@@ -362,13 +362,13 @@ export class ModeladorProceso implements OnInit {
     this.arcoService.eliminar(link.data.backendId).subscribe({
       next: () => {
         this.guardando = false;
-        this.cargarDatos(); // recarga completa para estado visual consistente
+        this.cargarDatos(); 
       },
       error: () => { this.guardando = false; },
     });
   }
 
-  // Midpoint perpendicular al segmento — offset > 0 curva hacia un lado, < 0 al otro
+
   private curvedMidpoint(
     src: { x: number; y: number },
     tgt: { x: number; y: number },
@@ -383,7 +383,6 @@ export class ModeladorProceso implements OnInit {
     return { x: mx + (-dy / len) * offset, y: my + (dx / len) * offset };
   }
 
-  // Punto en el borde del nodo en dirección hacia `from`
   private borderPoint(
     from: { x: number; y: number },
     nodeCenter: { x: number; y: number },
@@ -511,7 +510,7 @@ export class ModeladorProceso implements OnInit {
         }));
 
         const edges = graph.edges ?? graph.links ?? [];
-        // Detectar arcos bidireccionales
+       
         const reverseSet = new Set<string>();
         edges.forEach((e: any) => {
           if (edges.some((r: any) => r.source === e.target && r.target === e.source)) {
@@ -533,7 +532,6 @@ export class ModeladorProceso implements OnInit {
           }
         });
 
-        // ngx-graph lee edgeLabels (no graph.edges) para calcular las rutas SVG
         graph.edgeLabels = graph.edges;
 
         graph.width  = isFinite(maxX - minX) ? maxX - minX + 200 : 800;

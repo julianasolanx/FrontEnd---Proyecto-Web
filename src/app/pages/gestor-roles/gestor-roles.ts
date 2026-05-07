@@ -71,7 +71,7 @@ export class GestorRoles implements OnInit {
   }
 
   volver(): void {
-    // Redirección fija al dashboard general
+  
     this.router.navigate(['/dashboard-general']);
   }
 

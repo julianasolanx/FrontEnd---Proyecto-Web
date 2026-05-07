@@ -20,17 +20,17 @@ export class ProcesoService {
  
   constructor(private http: HttpClient) {}
  
-  /** GET /api/procesos */
+ 
   listar(): Observable<Proceso[]> {
     return this.http.get<Proceso[]>(this.url);
   }
  
-  /** GET /api/procesos/empresa/:empresaId */
+  
   listarPorEmpresa(empresaId: number): Observable<Proceso[]> {
     return this.http.get<Proceso[]>(`${this.url}/empresa/${empresaId}`);
   }
  
-  /** GET /api/procesos/empresa/:empresaId/filtrar?estado=&categoria= */
+ 
   filtrar(empresaId: number, filtros: ProcesoFiltros = {}): Observable<Proceso[]> {
     let params = new HttpParams();
     if (filtros.estado)    params = params.set('estado', filtros.estado);
@@ -38,22 +38,22 @@ export class ProcesoService {
     return this.http.get<Proceso[]>(`${this.url}/empresa/${empresaId}/filtrar`, { params });
   }
  
-  /** GET /api/procesos/:id */
+ 
   obtener(id: number): Observable<Proceso> {
     return this.http.get<Proceso>(`${this.url}/${id}`);
   }
  
-  /** POST /api/procesos */
+  
   crear(dto: ProcesoRequest): Observable<Proceso> {
     return this.http.post<Proceso>(this.url, dto);
   }
  
-  /** PUT /api/procesos/:id */
+
   actualizar(id: number, dto: ProcesoRequest): Observable<Proceso> {
     return this.http.put<Proceso>(`${this.url}/${id}`, dto);
   }
  
-  /** DELETE /api/procesos/:id */
+  
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/${id}`);
   }

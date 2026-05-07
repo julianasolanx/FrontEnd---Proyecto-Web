@@ -34,14 +34,14 @@ export class LogIn {
 
     this.usuarioService.login(this.loginForm.value).subscribe({
       next: (usuario: any) => {
-        // Guardamos el ID de la empresa en el almacenamiento local
+       
         const idDeLaEmpresa = usuario.empresa?.id || usuario.empresaId;
 
         if (idDeLaEmpresa) {
           localStorage.setItem('empresaId', idDeLaEmpresa.toString());
         }
 
-        // Redirección única: No importa el rol, todos van a la misma página
+        
         this.router.navigate(['/dashboard-general']);
       },
       error: () => {

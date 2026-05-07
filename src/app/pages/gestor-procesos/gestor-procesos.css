@@ -1,4 +1,4 @@
-/* ── Base ─────────────────────────────────────────────── */
+
 .gestor-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
@@ -7,7 +7,7 @@
   position: relative;
 }
 
-/* ── Header ───────────────────────────────────────────── */
+
 .page-header {
   display: flex;
   align-items: center;
@@ -45,7 +45,6 @@
   font-weight: 500;
 }
 
-/* ── Filtros ──────────────────────────────────────────── */
 .filtros-bar {
   display: flex;
   gap: 12px;
@@ -94,14 +93,14 @@
 }
 .filter-select:focus { box-shadow: 0 0 0 3px rgba(59,130,246,0.25); }
 
-/* ── Grid ─────────────────────────────────────────────── */
+
 .procesos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 24px;
 }
 
-/* ── Card ─────────────────────────────────────────────── */
+
 .proceso-card {
   background: white;
   border-radius: 16px;
@@ -166,7 +165,7 @@
   overflow: hidden;
 }
 
-/* ── Card buttons ─────────────────────────────────────── */
+
 .card-actions {
   display: flex;
   gap: 8px;
@@ -195,7 +194,6 @@
 .btn-eliminar { background: #fff1f2; color: #be123c; }
 .btn-eliminar:hover { background: #ffe4e6; }
 
-/* ── Empty state ──────────────────────────────────────── */
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -205,7 +203,7 @@
 .empty-title { font-size: 1.2rem; font-weight: 700; color: #334155; margin: 0 0 6px; }
 .empty-sub   { font-size: 0.9rem; color: #94a3b8; margin: 0; }
 
-/* ── FAB Agregar ──────────────────────────────────────── */
+
 .btn-agregar {
   position: fixed;
   bottom: 36px;

@@ -74,7 +74,7 @@ export class RegistrarEmpresa {
           this.cargando = false;
           console.error('DETALLE DEL ERROR:', err);
           
-          // Lógica de mensajes para el usuario
+          
           let mensajeVisible = 'Hubo un error al procesar el registro.';
           
           if (err.status === 409) {

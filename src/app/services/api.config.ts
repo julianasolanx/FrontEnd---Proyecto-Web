@@ -8,5 +8,5 @@ export const API_ENDPOINTS = {
   arco: `${BASE_URL}/arcos`,
   empresas: `${BASE_URL}/empresas`,
   gateways: `${BASE_URL}/gateways`
-  // Agrega los demás endpoints que necesites aquí
+ 
 };

@@ -1,13 +1,13 @@
 <div class="modelador-wrapper">
 
-  <!-- HEADER -->
+  <
   <div class="modelador-header">
     <button class="btn-back" (click)="volver()">← Volver</button>
     <h1 class="header-title">Modelador de Proceso</h1>
     <span class="header-badge" *ngIf="cargando">Cargando...</span>
   </div>
 
-  <!-- TOOLBAR -->
+ 
   <div class="toolbar">
     <div class="toolbar-row">
       <div class="toolbar-group">
@@ -52,13 +52,13 @@
     </div>
   </div>
 
-  <!-- LOADING STATE -->
+
   <div class="loading-state" *ngIf="cargando">
     <div class="spinner"></div>
     <p>Cargando elementos del proceso...</p>
   </div>
 
-  <!-- GRAPH -->
+ 
   <div class="graph-container" *ngIf="!cargando">
     <div class="empty-graph" *ngIf="nodes.length === 0">
       <p>Este proceso no tiene elementos aún.</p>
@@ -102,7 +102,7 @@
 
       <ng-template #linkTemplate let-link>
         <svg:g class="edge" style="cursor:pointer" (click)="onArcoClick(link, $event)">
-          <!-- área invisible más ancha para facilitar el clic -->
+          
           <svg:path
             [attr.d]="link.line"
             stroke="transparent"
@@ -131,7 +131,7 @@
 
 </div>
 
-<!-- ===== MODAL: EDITAR NODO ===== -->
+
 <div class="modal-overlay" *ngIf="showEditModal" (click)="cerrarModal()">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -188,7 +188,7 @@
   </div>
 </div>
 
-<!-- ===== MODAL: NUEVA ACTIVIDAD ===== -->
+
 <div class="modal-overlay" *ngIf="showAddActividadModal" (click)="showAddActividadModal = false">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -229,7 +229,7 @@
   </div>
 </div>
 
-<!-- ===== MODAL: NUEVO GATEWAY ===== -->
+
 <div class="modal-overlay" *ngIf="showAddGatewayModal" (click)="showAddGatewayModal = false">
   <div class="modal-card" (click)="$event.stopPropagation()">
     <div class="modal-header">

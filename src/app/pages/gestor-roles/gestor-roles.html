@@ -2,7 +2,7 @@
   <button class="back-arrow" (click)="volver()">⤺</button>
 
   <div class="main-layout">
-    <!-- PANEL IZQUIERDO -->
+    
     <section class="left-panel">
       <h1>Gestor de Roles</h1>
       <div class="card-blue">
@@ -31,7 +31,7 @@
       </div>
     </section>
 
-    <!-- PANEL DERECHO -->
+  
     <section class="right-panel">
       <div class="rol-list">
         <div class="empty-state" *ngIf="rolesFiltrados.length === 0">
@@ -72,7 +72,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: DETALLE DEL ROL -->
+  
   <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="mostrarModalDetalle = false">
     <div class="modal-card detail-card" (click)="$event.stopPropagation()">
       

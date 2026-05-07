@@ -1,6 +1,6 @@
 <div class="gestor-container">
 
-  <!-- HEADER -->
+  
   <div class="page-header">
     <button class="btn-back" (click)="volver()">← Volver</button>
     <div class="header-text">
@@ -9,7 +9,7 @@
     </div>
   </div>
 
-  <!-- FILTROS -->
+
   <form [formGroup]="filtrosForm" class="filtros-bar">
     <div class="search-box">
       <span class="search-icon">🔍</span>
@@ -27,7 +27,7 @@
     </select>
   </form>
 
-  <!-- GRID DE PROCESOS -->
+  
   <div class="procesos-grid">
 
     <div class="empty-state" *ngIf="procesosFiltrados.length === 0">
@@ -62,7 +62,7 @@
 
   </div>
 
-  <!-- BOTÓN AGREGAR -->
+ 
   <button *ngIf="rolActual !== 'LECTOR'" class="btn-agregar" (click)="agregarProceso()">
     + Agregar Proceso
   </button>

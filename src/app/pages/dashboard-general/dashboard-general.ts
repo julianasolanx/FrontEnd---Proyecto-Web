@@ -25,10 +25,10 @@ export class DashboardGeneral {
   }
 
   logout(): void {
-    // Limpiamos los datos de sesión almacenados anteriormente
+   
     localStorage.removeItem('empresaId');
     localStorage.removeItem('usuarioRol');
-    // Redirigimos al layout-inicial según tu instrucción
+    
     this.router.navigate(['/']);
   }
 }

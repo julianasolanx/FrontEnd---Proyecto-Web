@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-//import { UsuarioService, EmailInvitacionRequest } from '../../services/usuario.service';
 import { Usuario } from '../../models/usuario.model';
 import { CommonModule } from '@angular/common';
 import { UsuarioService, EmailInvitacionRequest, InvitarUsuarioRequest } from '../../services/usuario.service';
@@ -99,7 +98,7 @@ export class GestorUsuarios implements OnInit {
   }
 
   irADashboard(): void {
-    // Redirección fija sin importar el rol
+   
     this.router.navigate(['/dashboard-general']);
   }
 }

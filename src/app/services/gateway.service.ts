@@ -13,32 +13,32 @@ export class GatewayService {
  
   constructor(private http: HttpClient) {}
  
-  /** GET /api/gateways */
+ 
   listar(): Observable<Gateway[]> {
     return this.http.get<Gateway[]>(this.url);
   }
  
-  /** GET /api/gateways/proceso/:procesoId */
+  
   listarPorProceso(procesoId: number): Observable<Gateway[]> {
     return this.http.get<Gateway[]>(`${this.url}/proceso/${procesoId}`);
   }
  
-  /** GET /api/gateways/:id */
+ 
   obtener(id: number): Observable<Gateway> {
     return this.http.get<Gateway>(`${this.url}/${id}`);
   }
  
-  /** POST /api/gateways */
+  
   crear(dto: GatewayRequest): Observable<Gateway> {
     return this.http.post<Gateway>(this.url, dto);
   }
  
-  /** PUT /api/gateways/:id */
+  
   actualizar(id: number, dto: GatewayRequest): Observable<Gateway> {
     return this.http.put<Gateway>(`${this.url}/${id}`, dto);
   }
  
-  /** DELETE /api/gateways/:id */
+  
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/${id}`);
   }
