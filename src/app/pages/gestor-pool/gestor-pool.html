@@ -8,6 +8,13 @@
     <p>Cargando pool...</p>
   </div>
 
+  <div class="empty-state" *ngIf="sinPool && !cargando">
+    <p>Esta empresa no tiene un pool configurado aún.</p>
+    <button class="btn-primary" (click)="crearPoolInicial()" [disabled]="guardando">
+      {{ guardando ? 'Creando...' : '+ Crear pool principal' }}
+    </button>
+  </div>
+
   <!-- INFO DEL POOL (HU-21) -->
   <section class="pool-card" *ngIf="pool && !cargando">
     <div class="section-header">

@@ -20,6 +20,7 @@ export class GestorPool implements OnInit {
   empresaId = 0;
   cargando = false;
   guardando = false;
+  sinPool = false;
 
   editandoPool = false;
   poolForm = { nombre: '', descripcion: '' };
@@ -42,13 +43,33 @@ export class GestorPool implements OnInit {
 
   cargarPool(): void {
     this.cargando = true;
+    this.sinPool = false;
     this.poolService.obtenerPorEmpresa(this.empresaId).subscribe({
       next: (pool) => {
         this.pool = pool;
         this.cargarLanes();
         this.cargando = false;
       },
-      error: () => { this.cargando = false; },
+      error: (err) => {
+        this.cargando = false;
+        if (err.status === 404) {
+          this.sinPool = true;
+        }
+      },
+    });
+  }
+
+  crearPoolInicial(): void {
+    if (this.guardando) return;
+    this.guardando = true;
+    this.poolService.crear({ nombre: 'Pool principal', descripcion: '', empresaId: this.empresaId }).subscribe({
+      next: (pool) => {
+        this.pool = pool;
+        this.sinPool = false;
+        this.guardando = false;
+        this.cargarLanes();
+      },
+      error: () => { this.guardando = false; },
     });
   }
 
