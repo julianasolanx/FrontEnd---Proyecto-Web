@@ -266,7 +266,7 @@ export class ModeladorProceso implements OnInit {
     });
   }
 
-  onNodeClick(node: Node): void {
+  onNodeClick(node: any): void {
     this.selectedNode = node;
     this.editableNode = {
       nombre: node.data.nombre,
