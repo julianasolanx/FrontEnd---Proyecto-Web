@@ -24,6 +24,10 @@ export class DashboardGeneral {
     this.router.navigate(['/gestor-procesos']);
   }
 
+  irAPool(): void {
+    this.router.navigate(['/gestor-pool']);
+  }
+
   logout(): void {
    
     localStorage.removeItem('empresaId');

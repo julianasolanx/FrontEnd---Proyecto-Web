@@ -32,7 +32,8 @@ export class FormularioProceso implements OnInit {
       nombre: ['', Validators.required],
       categoria: ['', Validators.required],
       descripcion: ['', Validators.required],
-      estado: ['BORRADOR', Validators.required] // Estado por defecto
+      estado: ['BORRADOR', Validators.required],
+      esCompartido: [false],
     });
   }
 
@@ -64,7 +65,8 @@ export class FormularioProceso implements OnInit {
           nombre: proceso.nombre,
           categoria: proceso.categoria,
           descripcion: proceso.descripcion,
-          estado: proceso.estado
+          estado: proceso.estado,
+          esCompartido: proceso.esCompartido ?? false,
         });
         this.cdr.detectChanges();
       },
@@ -90,7 +92,8 @@ export class FormularioProceso implements OnInit {
       descripcion: this.procesoForm.value.descripcion,
       categoria: this.procesoForm.value.categoria,
       estado: this.procesoForm.value.estado,
-      empresaId: this.empresaId
+      empresaId: this.empresaId,
+      esCompartido: this.procesoForm.value.esCompartido ?? false,
     };
 
     if (this.esModoEdicion && this.procesoId) {

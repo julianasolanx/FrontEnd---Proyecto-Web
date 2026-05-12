@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { RolProcesoService } from '../../services/rolproceso.service';
 import { ProcesoService } from '../../services/proceso.service';
-import { RolProceso, RolProcesoRequest } from '../../models/rolproceso.model';
+import { Permiso, RolProceso, RolProcesoRequest } from '../../models/rolproceso.model';
 import { Proceso } from '../../models/proceso.model';
 import { CommonModule } from '@angular/common';
 
@@ -31,8 +31,14 @@ export class GestorRoles implements OnInit {
   mostrarModalDetalle: boolean = false;
   guardandoRol: boolean = false;
   empresaId: number = 0;
-  
+
   descripcionTemporalModal: string = '';
+
+  todosLosPermisos: Permiso[] = [
+    'CREAR_PROCESO', 'EDITAR_PROCESO', 'ELIMINAR_PROCESO',
+    'PUBLICAR_PROCESO', 'GESTIONAR_ROLES', 'GESTIONAR_USUARIOS', 'VER_PROCESOS_COMPARTIDOS',
+  ];
+  permisosSeleccionados: Set<Permiso> = new Set();
 
   constructor(
     private fb: FormBuilder,
@@ -132,10 +138,27 @@ export class GestorRoles implements OnInit {
     }
   }
 
+  permisoLabel(p: Permiso): string {
+    return p.toLowerCase().replace(/_/g, ' ');
+  }
+
+  togglePermiso(p: Permiso): void {
+    if (this.permisosSeleccionados.has(p)) {
+      this.permisosSeleccionados.delete(p);
+    } else {
+      this.permisosSeleccionados.add(p);
+    }
+  }
+
+  tienePermiso(p: Permiso): boolean {
+    return this.permisosSeleccionados.has(p);
+  }
+
   abrirModalCrear(): void {
     this.crearRolForm.reset();
+    this.permisosSeleccionados = new Set();
     this.mostrarModalCrear = true;
-    this.cdr.detectChanges(); 
+    this.cdr.detectChanges();
   }
 
   guardarNuevoRol(): void {
@@ -145,7 +168,8 @@ export class GestorRoles implements OnInit {
     const dto: RolProcesoRequest = {
       nombre: this.crearRolForm.value.nombre,
       descripcion: this.crearRolForm.value.descripcion,
-      empresaId: this.empresaId
+      empresaId: this.empresaId,
+      permisos: Array.from(this.permisosSeleccionados),
     };
 
     this.rolService.crear(dto).subscribe({
@@ -167,6 +191,7 @@ export class GestorRoles implements OnInit {
     this.rolEnModalDetalle = rol;
     this.mostrarModalDetalle = true;
     this.modoEdicionModal = false;
+    this.permisosSeleccionados = new Set(rol.permisos ?? []);
     
     this.procesoService.listarPorEmpresa(this.empresaId).subscribe(procesos => {
       this.procesosDelRol = procesos.filter(p => 
@@ -188,7 +213,8 @@ export class GestorRoles implements OnInit {
       const dto: RolProcesoRequest = {
         nombre: this.rolEnModalDetalle.nombre,
         descripcion: this.descripcionTemporalModal,
-        empresaId: this.empresaId
+        empresaId: this.empresaId,
+        permisos: Array.from(this.permisosSeleccionados),
       };
 
       this.rolService.actualizar(this.rolEnModalDetalle.id, dto).subscribe(() => {

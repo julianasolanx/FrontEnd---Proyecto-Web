@@ -8,6 +8,8 @@ import { GestorProcesos } from './pages/gestor-procesos/gestor-procesos';
 import { GestorRoles } from './pages/gestor-roles/gestor-roles';
 import { ModeladorProceso } from './pages/modelador-proceso/modelador-proceso';
 import { FormularioProceso } from './pages/formulario-proceso/formulario-proceso';
+import { GestorPool } from './pages/gestor-pool/gestor-pool';
+import { GestorMensajes } from './pages/gestor-mensajes/gestor-mensajes';
 
 export const routes: Routes = [
   { path: '', component: LayoutInicial },
@@ -17,8 +19,10 @@ export const routes: Routes = [
   { path: 'gestor-usuarios', component: GestorUsuarios },
   { path: 'gestor-procesos', component: GestorProcesos },
   { path: 'gestor-roles', component: GestorRoles },
+  { path: 'gestor-pool', component: GestorPool },
   { path: 'modelador-proceso', component: ModeladorProceso },
-  { path: 'modelador-proceso/:id', component: ModeladorProceso }, // Para ver detalle
-  { path: 'formulario-proceso', component: FormularioProceso }, // Para agregar nuevo
+  { path: 'modelador-proceso/:id', component: ModeladorProceso },
+  { path: 'formulario-proceso', component: FormularioProceso },
   { path: 'formulario-proceso/:id', component: FormularioProceso },
+  { path: 'gestor-mensajes/:procesoId', component: GestorMensajes },
 ];

@@ -1,0 +1,199 @@
+<div class="mensajes-wrapper">
+  <div class="page-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <h1>Mensajes del Proceso</h1>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button [class.active]="tabActivo === 'mensajes'" (click)="tabActivo = 'mensajes'">📨 Mensajes</button>
+    <button [class.active]="tabActivo === 'eventos'" (click)="tabActivo = 'eventos'">📋 Eventos</button>
+    <button [class.active]="tabActivo === 'reglas'" (click)="tabActivo = 'reglas'">🔗 Correlación</button>
+  </div>
+
+  <!-- MENSAJES (HU-25 / HU-27) -->
+  <div class="tab-content" *ngIf="tabActivo === 'mensajes'">
+    <div class="content-header">
+      <p class="hint-text">Define mensajes THROW (enviar) o CATCH (recibir) vinculados a este proceso.</p>
+      <button class="btn-primary" (click)="abrirNuevoMensaje()">+ Nuevo mensaje</button>
+    </div>
+
+    <div class="table-wrap" *ngIf="mensajes.length > 0">
+      <table>
+        <thead>
+          <tr><th>Nombre</th><th>Tipo</th><th>Business Key</th><th>Payload Template</th><th>Acciones</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of mensajes">
+            <td>{{ m.nombre }}</td>
+            <td><span [class]="m.tipo === 'THROW' ? 'badge-throw' : 'badge-catch'">{{ m.tipo }}</span></td>
+            <td>{{ m.businessKey || '—' }}</td>
+            <td class="payload-cell">{{ m.payloadTemplate || '—' }}</td>
+            <td class="actions-cell">
+              <button class="btn-sm btn-outline" (click)="abrirEditarMensaje(m)">Editar</button>
+              <button class="btn-sm btn-green" *ngIf="m.tipo === 'THROW'" (click)="abrirLanzar(m)">Lanzar ▶</button>
+              <button class="btn-sm btn-danger" (click)="eliminarMensaje(m)">Eliminar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty-state" *ngIf="mensajes.length === 0 && !cargando">
+      No hay mensajes configurados. Crea un THROW para enviar o un CATCH para recibir.
+    </div>
+  </div>
+
+  <!-- EVENTOS (HU-25 auditoría) -->
+  <div class="tab-content" *ngIf="tabActivo === 'eventos'">
+    <p class="hint-text">Registro de todos los mensajes enviados y recibidos por este proceso.</p>
+    <div class="table-wrap" *ngIf="eventos.length > 0">
+      <table>
+        <thead>
+          <tr><th>Mensaje</th><th>Business Key</th><th>Estado</th><th>Enviado</th><th>Entregado</th><th>Emisor</th><th>Receptor</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of eventos">
+            <td>{{ e.nombreMensaje }}</td>
+            <td>{{ e.businessKey || '—' }}</td>
+            <td><span class="badge" [class]="estadoClass(e.estado)">{{ e.estado }}</span></td>
+            <td>{{ e.fechaEnvio | date:'short' }}</td>
+            <td>{{ e.fechaEntrega ? (e.fechaEntrega | date:'short') : '—' }}</td>
+            <td>P#{{ e.procesoEmisorId || '—' }}</td>
+            <td>P#{{ e.procesoReceptorId || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty-state" *ngIf="eventos.length === 0">No hay eventos registrados aún.</div>
+  </div>
+
+  <!-- CORRELACIÓN (HU-28) -->
+  <div class="tab-content" *ngIf="tabActivo === 'reglas'">
+    <div class="content-header">
+      <p class="hint-text">Define cómo los mensajes entrantes se correlacionan con instancias de este proceso.</p>
+      <button class="btn-primary" (click)="abrirNuevaRegla()">+ Nueva regla</button>
+    </div>
+    <div class="table-wrap" *ngIf="reglas.length > 0">
+      <table>
+        <thead>
+          <tr><th>Mensaje</th><th>Tipo correlación</th><th>Valor</th><th>Política múltiple</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of reglas">
+            <td>{{ r.nombreMensaje }}</td>
+            <td>{{ r.tipoCorrelacion }}</td>
+            <td>{{ r.valorCorrelacion }}</td>
+            <td>{{ r.politicaMultiple }}</td>
+            <td><button class="btn-sm btn-danger" (click)="eliminarRegla(r)">Eliminar</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty-state" *ngIf="reglas.length === 0">No hay reglas de correlación definidas.</div>
+  </div>
+</div>
+
+<!-- MODAL MENSAJE -->
+<div class="modal-overlay" *ngIf="showModalMensaje" (click)="showModalMensaje = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editandoMensaje ? 'Editar Mensaje' : 'Nuevo Mensaje' }}</h2>
+      <button class="btn-close" (click)="showModalMensaje = false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>Nombre *</label>
+        <input [(ngModel)]="mensajeForm.nombre" placeholder="Ej: pago-confirmado" />
+      </div>
+      <div class="field-group">
+        <label>Tipo</label>
+        <select [(ngModel)]="mensajeForm.tipo">
+          <option value="THROW">THROW — Enviar mensaje</option>
+          <option value="CATCH">CATCH — Recibir mensaje</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Business Key</label>
+        <input [(ngModel)]="mensajeForm.businessKey" placeholder="Ej: orderId" />
+      </div>
+      <div class="field-group">
+        <label>Payload Template (JSON)</label>
+        <textarea [(ngModel)]="mensajeForm.payloadTemplate" rows="3" placeholder='{"orderId": "{{orderId}}"}'></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showModalMensaje = false">Cancelar</button>
+      <button class="btn-primary" (click)="guardarMensaje()" [disabled]="guardando || !mensajeForm.nombre.trim()">
+        {{ guardando ? 'Guardando...' : (editandoMensaje ? 'Actualizar' : 'Crear') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LANZAR MENSAJE -->
+<div class="modal-overlay" *ngIf="showModalLanzar" (click)="showModalLanzar = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Lanzar: {{ mensajeSeleccionado?.nombre }}</h2>
+      <button class="btn-close" (click)="showModalLanzar = false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>Business Key (correlación)</label>
+        <input [(ngModel)]="lanzarForm.businessKey" placeholder="Valor de correlación" />
+      </div>
+      <div class="field-group">
+        <label>Payload (JSON)</label>
+        <textarea [(ngModel)]="lanzarForm.payload" rows="4" placeholder='{"dato": "valor"}'></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showModalLanzar = false">Cancelar</button>
+      <button class="btn-primary btn-green-primary" (click)="lanzarMensaje()" [disabled]="guardando">
+        {{ guardando ? 'Enviando...' : '▶ Lanzar mensaje' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REGLA CORRELACIÓN -->
+<div class="modal-overlay" *ngIf="showModalRegla" (click)="showModalRegla = false">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Nueva Regla de Correlación</h2>
+      <button class="btn-close" (click)="showModalRegla = false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>Nombre del mensaje *</label>
+        <input [(ngModel)]="reglaForm.nombreMensaje" placeholder="Ej: pago-confirmado" />
+      </div>
+      <div class="field-group">
+        <label>Tipo de correlación</label>
+        <select [(ngModel)]="reglaForm.tipoCorrelacion">
+          <option value="BUSINESS_KEY">Business Key</option>
+          <option value="VARIABLE">Variable de proceso</option>
+          <option value="EXPRESION">Expresión</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Valor de correlación</label>
+        <input [(ngModel)]="reglaForm.valorCorrelacion" placeholder="Valor esperado" />
+      </div>
+      <div class="field-group">
+        <label>Política si hay múltiples coincidencias</label>
+        <select [(ngModel)]="reglaForm.politicaMultiple">
+          <option value="PRIMERA">Entregar a la primera</option>
+          <option value="NUEVA_INSTANCIA">Crear nueva instancia</option>
+          <option value="ERROR">Error</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="showModalRegla = false">Cancelar</button>
+      <button class="btn-primary" (click)="guardarRegla()" [disabled]="guardando || !reglaForm.nombreMensaje.trim()">
+        {{ guardando ? 'Guardando...' : 'Crear regla' }}
+      </button>
+    </div>
+  </div>
+</div>

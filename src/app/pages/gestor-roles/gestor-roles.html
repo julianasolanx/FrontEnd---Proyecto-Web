@@ -61,7 +61,16 @@
         
         <label>Descripción:</label>
         <textarea class="modal-input" formControlName="descripcion" placeholder="Indica sus responsabilidades..."></textarea>
-        
+
+        <!-- HU-24: Permisos -->
+        <label style="margin-top:12px; display:block; font-weight:600;">Permisos del rol:</label>
+        <div class="permisos-grid">
+          <label class="permiso-check" *ngFor="let p of todosLosPermisos">
+            <input type="checkbox" [checked]="tienePermiso(p)" (change)="togglePermiso(p)" />
+            {{ permisoLabel(p) }}
+          </label>
+        </div>
+
         <div class="modal-actions">
           <button type="button" class="btn-cancel" (click)="mostrarModalCrear = false">Cancelar</button>
           <button type="submit" class="btn-save" [disabled]="crearRolForm.invalid || guardandoRol">
@@ -94,6 +103,16 @@
       <ng-container *ngIf="modoEdicionModal">
         <h4 class="detail-subtitle">EDITANDO: {{ rolEnModalDetalle?.nombre }}</h4>
         <textarea class="modal-input" [value]="descripcionTemporalModal" #descInput (input)="descripcionTemporalModal = descInput.value"></textarea>
+
+        <!-- HU-24: Permisos en edición -->
+        <label style="margin-top:12px; display:block; font-weight:600; font-size:13px;">Permisos:</label>
+        <div class="permisos-grid">
+          <label class="permiso-check" *ngFor="let p of todosLosPermisos">
+            <input type="checkbox" [checked]="tienePermiso(p)" (change)="togglePermiso(p)" />
+            {{ permisoLabel(p) }}
+          </label>
+        </div>
+
         <div class="modal-actions-inline" style="margin-top: 15px;">
           <button class="btn-cancel" (click)="modoEdicionModal = false">Cancelar</button>
           <button class="btn-save" (click)="guardarEdicionModal()">Guardar</button>

@@ -11,9 +11,11 @@ import { ActividadService } from '../../services/actividad.service';
 import { GatewayService } from '../../services/gateway.service';
 import { ArcoService } from '../../services/arco.service';
 import { RolProcesoService } from '../../services/rolproceso.service';
+import { LaneService } from '../../services/lane.service';
 import { RolProceso } from '../../models/rolproceso.model';
 import { TipoActividad } from '../../models/actividad.model';
 import { TipoGateway } from '../../models/gateway.model';
+import { Lane } from '../../models/lane.model';
 
 @Component({
   selector: 'app-modelador-proceso',
@@ -28,7 +30,8 @@ export class ModeladorProceso implements OnInit {
   procesoId: number = 0;
 
   roles: RolProceso[] = [];
-  activityTypes: TipoActividad[] = ['TAREA', 'SUBPROCESO', 'EVENTO_INICIO', 'EVENTO_FIN'];
+  lanes: Lane[] = [];
+  activityTypes: TipoActividad[] = ['TAREA', 'SUBPROCESO', 'EVENTO_INICIO', 'EVENTO_FIN', 'MESSAGE_THROW', 'MESSAGE_CATCH'];
   gatewayTypes: TipoGateway[] = ['EXCLUSIVO', 'PARALELO', 'INCLUSIVO'];
 
   layout: string | Layout = 'dagre';
@@ -44,11 +47,11 @@ export class ModeladorProceso implements OnInit {
   showAddGatewayModal = false;
 
   selectedNode: Node | null = null;
-  editableNode: { nombre: string; tipo: string; descripcion: string; rolResponsableId: number | undefined } = {
-    nombre: '', tipo: '', descripcion: '', rolResponsableId: undefined
+  editableNode: { nombre: string; tipo: string; descripcion: string; rolResponsableId: number | undefined; laneId: number | undefined } = {
+    nombre: '', tipo: '', descripcion: '', rolResponsableId: undefined, laneId: undefined
   };
 
-  newActividad = { nombre: '', tipo: 'TAREA' as TipoActividad, descripcion: '', rolResponsableId: undefined as number | undefined };
+  newActividad = { nombre: '', tipo: 'TAREA' as TipoActividad, descripcion: '', rolResponsableId: undefined as number | undefined, laneId: undefined as number | undefined };
   newGateway = { nombre: '', tipo: 'EXCLUSIVO' as TipoGateway };
 
   @ViewChild('graphRef') graphRef: any;
@@ -64,6 +67,7 @@ export class ModeladorProceso implements OnInit {
     private gatewayService: GatewayService,
     private arcoService: ArcoService,
     private rolService: RolProcesoService,
+    private laneService: LaneService,
     @Inject(PLATFORM_ID) private platformId: Object,
     private cdr: ChangeDetectorRef
   ) {}
@@ -79,6 +83,7 @@ export class ModeladorProceso implements OnInit {
     const empresaId = parseInt(localStorage.getItem('empresaId') || '0');
     if (empresaId) {
       this.rolService.listarPorEmpresa(empresaId).subscribe(r => (this.roles = r));
+      this.laneService.listarPorEmpresa(empresaId).subscribe(l => (this.lanes = l));
     }
   }
 
@@ -109,6 +114,7 @@ export class ModeladorProceso implements OnInit {
             tipo: a.tipo,
             descripcion: a.descripcion,
             rolResponsableId: a.rolResponsableId,
+            laneId: a.laneId,
             rolNombre: this.getRolNombre(a.rolResponsableId),
             posicionX: a.posicionX ?? null,
             posicionY: a.posicionY ?? null,
@@ -175,7 +181,7 @@ export class ModeladorProceso implements OnInit {
   }
 
   abrirModalActividad(): void {
-    this.newActividad = { nombre: '', tipo: 'TAREA', descripcion: '', rolResponsableId: undefined };
+    this.newActividad = { nombre: '', tipo: 'TAREA', descripcion: '', rolResponsableId: undefined, laneId: undefined };
     this.showAddActividadModal = true;
   }
 
@@ -188,12 +194,13 @@ export class ModeladorProceso implements OnInit {
       descripcion: this.newActividad.descripcion,
       procesoId: this.procesoId,
       rolResponsableId: this.newActividad.rolResponsableId,
+      laneId: this.newActividad.laneId,
     }).subscribe({
       next: (a: any) => {
         this.nodes = [...this.nodes, {
           id: `actividad_${a.id}`,
           label: '',
-          data: { nodeType: 'actividad', backendId: a.id, nombre: a.nombre, tipo: a.tipo, descripcion: a.descripcion, rolResponsableId: a.rolResponsableId, rolNombre: this.getRolNombre(a.rolResponsableId) },
+          data: { nodeType: 'actividad', backendId: a.id, nombre: a.nombre, tipo: a.tipo, descripcion: a.descripcion, rolResponsableId: a.rolResponsableId, laneId: a.laneId, rolNombre: this.getRolNombre(a.rolResponsableId) },
         }];
         this.showAddActividadModal = false;
         this.guardando = false;
@@ -273,6 +280,7 @@ export class ModeladorProceso implements OnInit {
       tipo: node.data.tipo,
       descripcion: node.data.descripcion || '',
       rolResponsableId: node.data.rolResponsableId,
+      laneId: node.data.laneId,
     };
     this.showEditModal = true;
   }
@@ -289,10 +297,11 @@ export class ModeladorProceso implements OnInit {
         descripcion: this.editableNode.descripcion,
         procesoId: this.procesoId,
         rolResponsableId: this.editableNode.rolResponsableId,
+        laneId: this.editableNode.laneId,
       }).subscribe({
         next: (a: any) => {
           node.label = a.nombre;
-          Object.assign(node.data, { nombre: a.nombre, tipo: a.tipo, descripcion: a.descripcion, rolResponsableId: a.rolResponsableId, rolNombre: this.getRolNombre(a.rolResponsableId) });
+          Object.assign(node.data, { nombre: a.nombre, tipo: a.tipo, descripcion: a.descripcion, rolResponsableId: a.rolResponsableId, laneId: a.laneId, rolNombre: this.getRolNombre(a.rolResponsableId) });
           this.nodes = [...this.nodes];
           this.refreshGraph();
           this.cerrarModal();
@@ -440,6 +449,7 @@ export class ModeladorProceso implements OnInit {
             descripcion: ourNode.data.descripcion,
             procesoId: this.procesoId,
             rolResponsableId: ourNode.data.rolResponsableId,
+            laneId: ourNode.data.laneId,
             posicionX: x,
             posicionY: y,
           })
@@ -617,6 +627,7 @@ export class ModeladorProceso implements OnInit {
     const map: Record<string, string> = {
       TAREA: 'Tarea', SUBPROCESO: 'Subproceso',
       EVENTO_INICIO: 'Evento Inicio', EVENTO_FIN: 'Evento Fin',
+      MESSAGE_THROW: 'Enviar Mensaje', MESSAGE_CATCH: 'Recibir Mensaje',
       EXCLUSIVO: 'Exclusivo', PARALELO: 'Paralelo', INCLUSIVO: 'Inclusivo',
     };
     return map[tipo] ?? tipo;

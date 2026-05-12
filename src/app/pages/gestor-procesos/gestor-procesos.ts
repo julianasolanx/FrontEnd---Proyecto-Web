@@ -88,8 +88,12 @@ export class GestorProcesos implements OnInit {
     }
   }
 
-  verDetalle(id: number) { 
-    this.router.navigate(['/modelador-proceso', id]); 
+  verDetalle(id: number) {
+    this.router.navigate(['/modelador-proceso', id]);
+  }
+
+  verMensajes(id: number) {
+    this.router.navigate(['/gestor-mensajes', id]);
   }
 
   // PROTECCIÓN DE NAVEGACIÓN PARA LECTOR

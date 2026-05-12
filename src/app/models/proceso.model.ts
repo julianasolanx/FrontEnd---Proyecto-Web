@@ -12,17 +12,20 @@ export interface Proceso {
   categoria: string;
   estado: EstadoProceso;
   status: number;
+  esCompartido?: boolean;
+  poolId?: number;
   empresa: Empresa;
   actividades?: Actividad[];
   gateways?: Gateway[];
   arcos?: Arco[];
 }
- 
+
 export interface ProcesoRequest {
   nombre: string;
   descripcion: string;
   categoria: string;
   estado: EstadoProceso;
   empresaId: number;
+  esCompartido?: boolean;
 }
  
