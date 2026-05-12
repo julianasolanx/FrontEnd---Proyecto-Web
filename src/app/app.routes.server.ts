@@ -34,4 +34,6 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'modelador-proceso/:id', renderMode: RenderMode.Client },
   { path: 'formulario-proceso', renderMode: RenderMode.Client },
   { path: 'formulario-proceso/:id', renderMode: RenderMode.Client },
+  { path: 'gestor-pool', renderMode: RenderMode.Client },
+  { path: 'gestor-mensajes/:procesoId', renderMode: RenderMode.Client },
 ];
