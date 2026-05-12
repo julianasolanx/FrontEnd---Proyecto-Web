@@ -1,0 +1,70 @@
+<div class="gestor-container">
+
+  
+  <div class="page-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <div class="header-text">
+      <h1 class="page-title">Gestión de Procesos</h1>
+      <span class="proceso-count">{{ procesosFiltrados.length }} proceso{{ procesosFiltrados.length !== 1 ? 's' : '' }}</span>
+    </div>
+  </div>
+
+
+  <form [formGroup]="filtrosForm" class="filtros-bar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" formControlName="busqueda" placeholder="Buscar por nombre..." />
+    </div>
+
+    <select formControlName="categoria" class="filter-select">
+      <option value="">Todas las categorías</option>
+      <option *ngFor="let cat of categoriasDisponibles" [value]="cat">{{ cat }}</option>
+    </select>
+
+    <select formControlName="estado" class="filter-select">
+      <option value="">Todos los estados</option>
+      <option *ngFor="let est of estadosDisponibles" [value]="est">{{ est }}</option>
+    </select>
+  </form>
+
+  
+  <div class="procesos-grid">
+
+    <div class="empty-state" *ngIf="procesosFiltrados.length === 0">
+      <div class="empty-icon">📋</div>
+      <p class="empty-title">No hay procesos</p>
+      <p class="empty-sub">Crea el primer proceso con el botón inferior.</p>
+    </div>
+
+    <div class="proceso-card" *ngFor="let p of procesosFiltrados">
+      <div class="card-top">
+        <span class="estado-badge" [ngClass]="'estado-' + p.estado">{{ p.estado }}</span>
+        <span class="categoria-pill" *ngIf="p.categoria">{{ p.categoria }}</span>
+      </div>
+
+      <h2 class="card-title">{{ p.nombre }}</h2>
+      <p class="card-desc">{{ p.descripcion || 'Sin descripción' }}</p>
+
+      <div class="card-actions">
+        <button class="btn-action btn-detalle" (click)="verDetalle(p.id)">
+          Ver diagrama
+        </button>
+        <ng-container *ngIf="rolActual !== 'LECTOR'">
+          <button class="btn-action btn-editar" (click)="editarProceso(p.id)">
+            Editar
+          </button>
+          <button class="btn-action btn-eliminar" (click)="eliminarProceso(p)">
+            Eliminar
+          </button>
+        </ng-container>
+      </div>
+    </div>
+
+  </div>
+
+ 
+  <button *ngIf="rolActual !== 'LECTOR'" class="btn-agregar" (click)="agregarProceso()">
+    + Agregar Proceso
+  </button>
+
+</div>

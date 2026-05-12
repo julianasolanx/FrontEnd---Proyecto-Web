@@ -1,0 +1,21 @@
+services:
+  backend-service:
+    build: ../Proyecto-Desarrollo-Web-1
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://190.146.2.119:2345/grupo22
+      SPRING_DATASOURCE_USERNAME: grupo22_user
+      SPRING_DATASOURCE_PASSWORD: "G22#Px6!Rt2$$Lm8@Qw9K"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+      MAILTRAP_API_TOKEN: fbd1f46bb864be854032ea5ef02d5464
+      MAILTRAP_INBOX_ID: "4516053"
+    restart: always
+
+  frontend:
+    build: .
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend-service
+    restart: always

@@ -1,0 +1,49 @@
+<div class="page-container">
+  <div class="form-card">
+    <button class="back-button" (click)="volver()">←</button>
+    
+    <h1>Registrar empresa</h1>
+    <hr class="header-line">
+
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+      <div class="form-grid">
+    
+        <div class="column">
+          <h3>Administrador Inicial</h3>
+          
+          <label>Nombre:</label>
+          <input type="text" formControlName="nombreAdmin" placeholder="Ingrese su nombre">
+
+          <label>Correo:</label>
+          <input type="email" formControlName="correoAdmin" placeholder="Ingrese el correo electrónico">
+
+          <label>Contraseña:</label>
+          <input type="password" formControlName="contrasena" placeholder="Ingrese la contraseña (mín. 6 caracteres)">
+        </div>
+
+        
+        <div class="column">
+          <label class="empresa-label">Nombre de empresa:</label>
+          <input type="text" formControlName="nombreEmpresa" placeholder="Ingrese el nombre de la empresa">
+
+          <label>Correo de contacto:</label>
+          <input type="email" formControlName="correoContacto" placeholder="Ingrese el correo de la empresa">
+
+          <label>NIT:</label>
+          <input type="text" formControlName="nit" placeholder="Ingrese el NIT">
+        </div>
+      </div>
+
+      <!-- Mensaje de error visual en el formulario -->
+      <div class="error-container" *ngIf="registroForm.invalid && registroForm.touched">
+        <p>* Por favor, complete todos los campos obligatorios correctamente.</p>
+      </div>
+
+      <div class="footer-actions">
+        <button type="submit" class="btn-submit" [disabled]="registroForm.invalid || cargando">
+          {{ cargando ? 'Registrando...' : 'registrar empresa' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
