@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -33,7 +33,8 @@ export class GestorPool implements OnInit {
   constructor(
     private poolService: PoolService,
     private laneService: LaneService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -47,14 +48,14 @@ export class GestorPool implements OnInit {
     this.poolService.obtenerPorEmpresa(this.empresaId).subscribe({
       next: (pool) => {
         this.pool = pool;
-        this.cargarLanes();
         this.cargando = false;
+        this.cdr.detectChanges();
+        this.cargarLanes();
       },
       error: (err) => {
         this.cargando = false;
-        if (err.status === 404) {
-          this.sinPool = true;
-        }
+        this.sinPool = err.status === 404;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -67,15 +68,17 @@ export class GestorPool implements OnInit {
         this.pool = pool;
         this.sinPool = false;
         this.guardando = false;
+        this.cdr.detectChanges();
         this.cargarLanes();
       },
-      error: () => { this.guardando = false; },
+      error: () => { this.guardando = false; this.cdr.detectChanges(); },
     });
   }
 
   cargarLanes(): void {
     this.laneService.listarPorEmpresa(this.empresaId).subscribe({
-      next: (lanes) => (this.lanes = lanes),
+      next: (lanes) => { this.lanes = lanes; this.cdr.detectChanges(); },
+      error: () => { this.lanes = []; this.cdr.detectChanges(); },
     });
   }
 
