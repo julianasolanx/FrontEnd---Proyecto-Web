@@ -101,7 +101,7 @@ export class ModeladorProceso implements OnInit {
 
         actividades.forEach((a: any) => nodes.push({
           id: `actividad_${a.id}`,
-          label: a.nombre,
+          label: '',
           data: {
             nodeType: 'actividad',
             backendId: a.id,
@@ -117,7 +117,7 @@ export class ModeladorProceso implements OnInit {
 
         gateways.forEach((g: any) => nodes.push({
           id: `gateway_${g.id}`,
-          label: g.nombre,
+          label: '',
           data: {
             nodeType: 'gateway',
             backendId: g.id,
@@ -192,7 +192,7 @@ export class ModeladorProceso implements OnInit {
       next: (a: any) => {
         this.nodes = [...this.nodes, {
           id: `actividad_${a.id}`,
-          label: a.nombre,
+          label: '',
           data: { nodeType: 'actividad', backendId: a.id, nombre: a.nombre, tipo: a.tipo, descripcion: a.descripcion, rolResponsableId: a.rolResponsableId, rolNombre: this.getRolNombre(a.rolResponsableId) },
         }];
         this.showAddActividadModal = false;
@@ -220,7 +220,7 @@ export class ModeladorProceso implements OnInit {
       next: g => {
         this.nodes = [...this.nodes, {
           id: `gateway_${g.id}`,
-          label: g.nombre,
+          label: '',
           data: { nodeType: 'gateway', backendId: g.id, nombre: g.nombre, tipo: g.tipo },
         }];
         this.showAddGatewayModal = false;

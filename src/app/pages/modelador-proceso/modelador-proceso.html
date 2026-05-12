@@ -37,12 +37,12 @@
         <span class="toolbar-label">Conectar nodos</span>
         <select class="tool-select" [(ngModel)]="linkSource">
           <option [value]="null">Origen</option>
-          <option *ngFor="let n of nodes" [value]="n.id">{{ n.label }}</option>
+          <option *ngFor="let n of nodes" [value]="n.id">{{ n.data.nombre }}</option>
         </select>
         <span class="arrow-icon">→</span>
         <select class="tool-select" [(ngModel)]="linkTarget">
           <option [value]="null">Destino</option>
-          <option *ngFor="let n of nodes" [value]="n.id">{{ n.label }}</option>
+          <option *ngFor="let n of nodes" [value]="n.id">{{ n.data.nombre }}</option>
         </select>
         <input class="tool-input" [(ngModel)]="linkCondicion" placeholder="Condición (opcional)" />
         <button class="btn-tool btn-link" (click)="crearArco()" [disabled]="guardando">
@@ -96,7 +96,7 @@
             [attr.y]="(node.dimension?.height || 50) / 2"
             text-anchor="middle"
             dominant-baseline="central"
-          >{{ node.label }}</svg:text>
+          >{{ node.data.nombre }}</svg:text>
         </svg:g>
       </ng-template>
 
@@ -111,17 +111,17 @@
           ></svg:path>
           <svg:path
             class="line"
-            [attr.id]="link.id"
             [attr.d]="link.line"
             stroke="#94a3b8"
             stroke-width="2"
             fill="none"
             marker-end="url(#arrow)"
           ></svg:path>
-          <svg:text *ngIf="link.label" class="edge-label">
-            <textPath [attr.href]="'#' + link.id" startOffset="50%" text-anchor="middle">
-              {{ link.label }}
-            </textPath>
+          <svg:text *ngIf="link.label" class="edge-label"
+            [attr.x]="link.midPoint?.x"
+            [attr.y]="(link.midPoint?.y || 0) - 10"
+            text-anchor="middle">
+            {{ link.label }}
           </svg:text>
         </svg:g>
       </ng-template>
