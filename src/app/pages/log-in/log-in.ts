@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UsuarioService } from '../../services/usuario.service';
+import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -16,7 +16,7 @@ export class LogIn {
 
   constructor(
     private fb: FormBuilder,
-    private usuarioService: UsuarioService,
+    private authService: AuthService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -32,16 +32,13 @@ export class LogIn {
   onSubmit() {
     if (this.loginForm.invalid) return;
 
-    this.usuarioService.login(this.loginForm.value).subscribe({
-      next: (usuario: any) => {
-       
-        const idDeLaEmpresa = usuario.empresa?.id || usuario.empresaId;
-
-        if (idDeLaEmpresa) {
-          localStorage.setItem('empresaId', idDeLaEmpresa.toString());
+    const { correo, contrasena } = this.loginForm.value;
+    this.authService.login(correo, contrasena).subscribe({
+      next: (response) => {
+        if (response.id) {
+          localStorage.setItem('empresaId', response.id.toString());
         }
-
-        
+        localStorage.setItem('usuarioRol', response.rol ?? '');
         this.router.navigate(['/dashboard-general']);
       },
       error: () => {

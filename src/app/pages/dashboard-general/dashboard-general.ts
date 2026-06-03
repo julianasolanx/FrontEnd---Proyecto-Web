@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard-general',
@@ -10,7 +11,7 @@ import { Router } from '@angular/router';
 })
 export class DashboardGeneral {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   irAUsuarios(): void {
     this.router.navigate(['/gestor-usuarios']);
@@ -29,10 +30,6 @@ export class DashboardGeneral {
   }
 
   logout(): void {
-   
-    localStorage.removeItem('empresaId');
-    localStorage.removeItem('usuarioRol');
-    
-    this.router.navigate(['/']);
+    this.authService.logout();
   }
 }
