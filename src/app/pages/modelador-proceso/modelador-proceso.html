@@ -164,6 +164,13 @@
             <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.nombre }}</option>
           </select>
         </div>
+        <div class="field-group">
+          <label>Lane (swimlane)</label>
+          <select [(ngModel)]="editableNode.laneId">
+            <option [ngValue]="undefined">— Sin lane —</option>
+            <option *ngFor="let l of lanes" [ngValue]="l.id">{{ l.nombre }}</option>
+          </select>
+        </div>
       </ng-container>
 
       <ng-container *ngIf="selectedNode.data.nodeType === 'gateway'">
@@ -215,6 +222,13 @@
         <select [(ngModel)]="newActividad.rolResponsableId">
           <option [ngValue]="undefined">— Sin rol —</option>
           <option *ngFor="let r of roles" [ngValue]="r.id">{{ r.nombre }}</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Lane (swimlane)</label>
+        <select [(ngModel)]="newActividad.laneId">
+          <option [ngValue]="undefined">— Sin lane —</option>
+          <option *ngFor="let l of lanes" [ngValue]="l.id">{{ l.nombre }}</option>
         </select>
       </div>
     </div>

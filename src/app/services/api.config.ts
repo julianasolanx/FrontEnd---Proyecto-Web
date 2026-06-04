@@ -1,5 +1,7 @@
 const BASE_URL = '/api';
 
+export const API_BASE = BASE_URL;
+
 export const API_ENDPOINTS = {
   actividades: `${BASE_URL}/actividades`,
   procesos: `${BASE_URL}/procesos`,

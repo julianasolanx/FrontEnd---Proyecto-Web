@@ -28,6 +28,15 @@
         </select>
       </div>
 
+      <!-- HU-23: Compartir proceso entre pools -->
+      <div class="form-group form-check">
+        <label class="check-label">
+          <input type="checkbox" formControlName="esCompartido" />
+          <span>🌐 Compartir proceso con otras empresas</span>
+        </label>
+        <small class="hint">Solo administradores pueden marcar un proceso como compartido.</small>
+      </div>
+
       <div class="form-actions">
         <button type="button" class="btn-cancelar" (click)="volver()">Cancelar</button>
         <button type="submit" class="btn-guardar" [disabled]="procesoForm.invalid || guardando">

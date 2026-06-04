@@ -45,9 +45,15 @@
       <h2 class="card-title">{{ p.nombre }}</h2>
       <p class="card-desc">{{ p.descripcion || 'Sin descripción' }}</p>
 
+      <!-- HU-23: badge compartido -->
+      <div class="shared-badge" *ngIf="p.esCompartido">🌐 Compartido</div>
+
       <div class="card-actions">
         <button class="btn-action btn-detalle" (click)="verDetalle(p.id)">
           Ver diagrama
+        </button>
+        <button class="btn-action btn-mensajes" (click)="verMensajes(p.id)" title="Mensajes y correlación">
+          📨 Mensajes
         </button>
         <ng-container *ngIf="rolActual !== 'LECTOR'">
           <button class="btn-action btn-editar" (click)="editarProceso(p.id)">
